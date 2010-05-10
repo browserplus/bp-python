@@ -1,4 +1,4 @@
-<project name="BrowserPlusRuby" default="build_release">
+<project name="BrowserPlusPython" default="build_release">
     <condition property="is.windows">
         <os family="windows" />
     </condition>

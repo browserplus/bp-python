@@ -1,27 +1,8 @@
 h2. Overview
 
 This will be the home of the next iteration of the BrowserPlus
-"RubyInterpreter" service (5.x):
-http://browserplus.org/docs/developer/services/RubyInterpreter.html
-
-The key changes in 5.x over 4.x will include:
-
-# bp_require is no longer required, now, require() works to include ruby
-  files out of the service directory
-# you can able to ship native extensions with your ruby service
-# upgrade to ruby 1.9.x
-# performance improvements:  1.9.1 is much faster and we're working to
-  eliminate polling
-# ability to ship byte compiled ruby for obfuscation
-   (closed source code sucks, more for obfuscating api keys, and faster
-    load times)
-# improved the browserplus specific bits of our embedded ruby environment
-  (thanks _why, wherever you are)
-
-Features under consideration include:
-# more built in extensions to the ruby environment (including the ability
-  to use other services from a ruby service)
-
+"PythonInterpreter" service (1.x):
+http://browserplus.org/docs/developer/services/PythonInterpreter.html
 
 h3. Current State:
 
@@ -29,10 +10,10 @@ To be pushed to production RSN.
 
 h3. Build Notes:
 
-external/ is where all external dependencies ruby will be
+external/ is where all external dependencies python will be
 fetched, patched, and built.  You must first build external dependencies,
 and then can build the BrowserPlus service.  Using the BrowserPlus SDK
-you can run Ruby services from the command line, or install the service
+you can run Python services from the command line, or install the service
 locally and interact with them from the web.
 
 h3. Build & Test Prerequisites
@@ -53,7 +34,7 @@ h4. Building & running on OSX
 
 # git submodule init
 # git submodule update
-# cd external && ./build.rb (this will download and build an embeddable ruby)
+# cd external && ./build.rb (this will download and build an embeddable python)
 # cd src
 # mkdir build && cd build
 # cmake ..
@@ -61,27 +42,27 @@ h4. Building & running on OSX
 
 To run the interpreter with a sample service
 <pre>
-&lt;path_to_bpsdk&gt;/bin/ServiceRunner -providerPath src/build/RubyInterpreter test/HelloWorld
+&lt;path_to_bpsdk&gt;/bin/ServiceRunner -providerPath src/build/PythonInterpreter test/HelloWorld
 </pre>
 
-Now you'll be in a command shell where you can interact with the loaded ruby service
+Now you'll be in a command shell where you can interact with the loaded python service
 
 h4. Building & running on Win32
 
 > git submodule init
 > git submodule update
 > cd external
-> ruby build.rb
+> python build.rb
 > cd ..\..\src
 > mkdir build
 > cd build
 > cmake -G "Visual Studio 8 2008" ..
-> devenv RubyInterpreterService.sln 
+> devenv PythonInterpreterService.sln 
   (build Debug or Release)
 
 To run the interpreter with a sample service
 <pre>
-&lt;path_to_bpsdk&gt;\bin\ServiceRunner -providerPath src\build\RubyInterpreter test\HelloWorld
+&lt;path_to_bpsdk&gt;\bin\ServiceRunner -providerPath src\build\PythonInterpreter test\HelloWorld
 </pre>
 
 
@@ -90,4 +71,4 @@ License:
 see COPYING for information on licensing
 
 stay tuned,
-lloyd
+gary
