@@ -1,0 +1,93 @@
+h2. Overview
+
+This will be the home of the next iteration of the BrowserPlus
+"RubyInterpreter" service (5.x):
+http://browserplus.org/docs/developer/services/RubyInterpreter.html
+
+The key changes in 5.x over 4.x will include:
+
+# bp_require is no longer required, now, require() works to include ruby
+  files out of the service directory
+# you can able to ship native extensions with your ruby service
+# upgrade to ruby 1.9.x
+# performance improvements:  1.9.1 is much faster and we're working to
+  eliminate polling
+# ability to ship byte compiled ruby for obfuscation
+   (closed source code sucks, more for obfuscating api keys, and faster
+    load times)
+# improved the browserplus specific bits of our embedded ruby environment
+  (thanks _why, wherever you are)
+
+Features under consideration include:
+# more built in extensions to the ruby environment (including the ability
+  to use other services from a ruby service)
+
+
+h3. Current State:
+
+To be pushed to production RSN.
+
+h3. Build Notes:
+
+external/ is where all external dependencies ruby will be
+fetched, patched, and built.  You must first build external dependencies,
+and then can build the BrowserPlus service.  Using the BrowserPlus SDK
+you can run Ruby services from the command line, or install the service
+locally and interact with them from the web.
+
+h3. Build & Test Prerequisites
+
+* A recent version of ruby installed on your machine (on windows you can use the "one-click installer")
+* cmake, version 2.6 or greater (see http://cmake.org)
+* a recent version of the BrowserPlus SDK (http://browserplus.yahoo.com/developer/service/sdk/)
+* git (duh)
+* (windows only) Visual Studio 2008 (express should work?)
+
+After Checkout you must init submodules:
+<pre>
+$ git submodule init
+$ git submodule update
+</pre>
+
+h4. Building & running on OSX 
+
+# git submodule init
+# git submodule update
+# cd external && ./build.rb (this will download and build an embeddable ruby)
+# cd src
+# mkdir build && cd build
+# cmake ..
+# make
+
+To run the interpreter with a sample service
+<pre>
+&lt;path_to_bpsdk&gt;/bin/ServiceRunner -providerPath src/build/RubyInterpreter test/HelloWorld
+</pre>
+
+Now you'll be in a command shell where you can interact with the loaded ruby service
+
+h4. Building & running on Win32
+
+> git submodule init
+> git submodule update
+> cd external
+> ruby build.rb
+> cd ..\..\src
+> mkdir build
+> cd build
+> cmake -G "Visual Studio 8 2008" ..
+> devenv RubyInterpreterService.sln 
+  (build Debug or Release)
+
+To run the interpreter with a sample service
+<pre>
+&lt;path_to_bpsdk&gt;\bin\ServiceRunner -providerPath src\build\RubyInterpreter test\HelloWorld
+</pre>
+
+
+License:
+
+see COPYING for information on licensing
+
+stay tuned,
+lloyd
