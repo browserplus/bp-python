@@ -22,29 +22,24 @@
     </target>
     <target name="build_make_debug" unless="is.windows">
         <mkdir dir="../build_debug" />
-<!--
         <exec executable="cmake" dir="../build_debug" failonerror="true">
             <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Debug ../src" />
         </exec>
         <exec executable="make" dir="../build_debug" failonerror="true">
             <arg line="-j3" />
         </exec>
--->
     </target>
     <target name="build_make_release" unless="is.windows">
         <mkdir dir="../build_release" />
-<!--
         <exec executable="cmake" dir="../build_release" failonerror="true">
             <arg line="-G &quot;Unix Makefiles&quot; -DCMAKE_BUILD_TYPE:STRING=Release ../src" />
         </exec>
         <exec executable="make" dir="../build_release" failonerror="true">
             <arg line="-j3" />
         </exec>
--->
     </target>
     <target name="build_vc08_debug" if="is.windows">
         <mkdir dir="../build" />
-<!--
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
 call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
@@ -66,11 +61,9 @@ devenv PythonInterpreterService.sln /Build Debug /Project ALL_BUILD
             <arg line="/C x1.bat" />
         </exec>
         <delete file="../build/x1.bat" />
--->
     </target>
     <target name="build_vc08_release" if="is.windows">
         <mkdir dir="../build" />
-<!--
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
 call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
@@ -92,24 +85,18 @@ devenv PythonInterpreterService.sln /Build Release /Project ALL_BUILD
             <arg line="/C x1.bat" />
         </exec>
         <delete file="../build/x1.bat" />
--->
     </target>
     <target name="test_make_debug" unless="is.windows">
-<!--
         <exec executable="make" dir="../build_debug" failonerror="true">
             <arg line="test" />
         </exec>
--->
     </target>
     <target name="test_make_release" unless="is.windows">
-<!--
         <exec executable="make" dir="../build_release" failonerror="true">
             <arg line="test" />
         </exec>
--->
     </target>
     <target name="test_vc08_debug" if="is.windows">
-<!--
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
 call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
@@ -121,10 +108,8 @@ devenv PythonInterpreterService.sln /Build Debug /Project test
             <arg line="/C x1.bat" />
         </exec>
         <delete file="../build/x1.bat" />
--->
     </target>
     <target name="test_vc08_release" if="is.windows">
-<!--
         <delete file="../build/x1.bat" />
         <echo file="../build/x1.bat">@echo off
 call "C:\Program Files\Microsoft Visual Studio 9.0\vc\bin\vcvars32.bat"
@@ -136,7 +121,6 @@ devenv PythonInterpreterService.sln /Build Release /Project test
             <arg line="/C x1.bat" />
         </exec>
         <delete file="../build/x1.bat" />
--->
     </target>
     <target name="clean_debug" depends="clean_make_debug,clean_vc08_debug" />
     <target name="clean_release" depends="clean_make_release,clean_vc08_release" />
