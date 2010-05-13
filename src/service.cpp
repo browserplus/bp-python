@@ -36,10 +36,8 @@
 // boundary
 #include "bptypeutil.hh"
 
-#if 0
 // an abstraction around python 
 #include "PythonInterpreter.hh"
-#endif // 0
 #include "PythonHeaders.hh"
 
 #if 0
@@ -51,17 +49,55 @@
 #include <stdlib.h>
 #endif // 0
 
-#if 0
-#ifdef WIN32
-#define PATHSEP "\\"
-#else
-#define PATHSEP "/"
-#endif
-#endif // 0
+// a description of this corelet.
+BPCoreletDefinition s_pythonInterpreterDef = {
+    "PythonInterpreter",
+    1, 0, 0,
+    "Allows other services to be written in Python.",
+    0,
+    NULL
+};
 
-#if 0
 const BPCFunctionTable * g_bpCoreFunctions;
-#endif // 0
+
+const BPCoreletDefinition *
+BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
+              const BPElement * parameterMap)
+{
+    // the name of the python script and path can be extracted from the
+    // parameter map 
+    bp::Object * obj = bp::Object::build(parameterMap);
+
+    // first get the path
+    if (!obj->has("CoreletDirectory", BPTString)) {
+        delete obj;
+        return NULL;
+    }
+
+    std::string path(((bp::String *) obj->get("CoreletDirectory"))->value());
+
+    g_bpCoreFunctions = bpCoreFunctions;
+
+    delete obj;
+
+    // this will go in the BrowserPlusCore log file at info level.  nice.
+    
+    g_bpCoreFunctions->log(
+        BP_INFO,
+        "initializing python interpreter with service path: %s",
+        path.c_str());
+
+    // now let's initialize the python Interpreter
+    (void) python::initialize(path);
+
+    return &s_pythonInterpreterDef;
+}
+
+void
+BPPShutdown(void)
+{
+    python::shutdown();
+}
 
 #if 0
 int
@@ -97,27 +133,16 @@ BPPInvoke(void * instance, const char * funcName,
 #endif // 0
 
 #if 0
-void
-BPPShutdown(void)
-{
-    python::shutdown();
-}
-#endif // 0
-
-#if 0
-// a description of this corelet.
-BPCoreletDefinition s_pythonInterpreterDef = {
-    "PythonInterpreter",
-    5, 0, 0,
-    "Allows other services to be written in Python.",
-    0,
-    NULL
-};
-#endif // 0
-
-#if 0
 // file scoped memory representation of the services interface.
 static bp::service::Description * s_desc = NULL;
+#endif // 0
+
+#if 0
+#ifdef WIN32
+#define PATHSEP "\\"
+#else
+#define PATHSEP "/"
+#endif
 #endif // 0
 
 #if 0
@@ -177,41 +202,6 @@ BPPDetach(unsigned int attachID)
 {
     if (s_desc) delete s_desc;
     s_desc = NULL;
-}
-#endif // 0
-
-#if 0
-const BPCoreletDefinition *
-BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
-              const BPElement * parameterMap)
-{
-    // the name of the python script and path can be extracted from the
-    // parameter map 
-    bp::Object * obj = bp::Object::build(parameterMap);
-
-    // first get the path
-    if (!obj->has("CoreletDirectory", BPTString)) {
-        delete obj;
-        return NULL;
-    }
-
-    std::string path(((bp::String *) obj->get("CoreletDirectory"))->value());
-
-    g_bpCoreFunctions = bpCoreFunctions;
-
-    delete obj;
-
-    // this will go in the BrowserPlusCore log file at info level.  nice.
-    
-    g_bpCoreFunctions->log(
-        BP_INFO,
-        "initializing python interpreter with service path: %s",
-        path.c_str());
-
-    // now let's initialize the python Interpreter
-    (void) python::initialize(path);
-
-    return &s_pythonInterpreterDef;
 }
 #endif // 0
 

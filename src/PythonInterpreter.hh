@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -43,6 +42,10 @@ namespace python {
     // will correctly populate load paths.
     void initialize(const std::string & pathToPythonServiceDataDir);
 
+    // shutdown the python interpreter, freeing all possible resources.
+    void shutdown(void);
+
+#if 0
     // given a path to a entry point python file, load the file and
     // extract a description.
     // on error, NULL is returned and a human readable error is returned
@@ -57,10 +60,7 @@ namespace python {
                 unsigned int tid, bp::Map * arguments);
 
     void destroyInstance(void * instance);
-
-    // shutdown the python interpreter, freeing all possible resources.
-    void shutdown(void);
+#endif // 0
 }
 
 #endif
-#endif // 0

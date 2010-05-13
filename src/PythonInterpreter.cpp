@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -46,6 +45,7 @@
 
 #include <list>
 
+#if 0
 static char ** s_argv;
 static int s_argc = 1;
 
@@ -276,9 +276,11 @@ static void runWorkASync(python::Work * work)
     s_pythonCond.signal();
     s_pythonLock.unlock();
 }
+#endif // 0
 
 void python::initialize(const std::string & path)
 {
+#if 0
     if (!s_running) {
         s_pythonLock.lock();
         if (s_pythonThread.run(pythonThreadFunc, (void *) path.c_str())) {
@@ -286,10 +288,13 @@ void python::initialize(const std::string & path)
         }
         s_pythonLock.unlock();        
     }
+#endif // 0
+    Py_Initialize();
 }
 
 void python::shutdown(void)
 {
+#if 0
     // stop the python thread!
     if (s_running) {
         s_pythonLock.lock();
@@ -298,10 +303,11 @@ void python::shutdown(void)
         s_pythonLock.unlock();
         s_pythonThread.join();
     }
-    
-    (void) python_finalize();
+#endif // 0    
+    Py_Finalize();
 }
 
+#if 0
 bp::service::Description *
 python::loadPythonService(const std::string & pathToPythonFile,
                       std::string & oError)
