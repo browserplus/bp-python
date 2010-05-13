@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -43,4 +42,3 @@
 extern const BPCFunctionTable * g_bpCoreFunctions;
 
 #endif
-#endif // 0

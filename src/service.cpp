@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -37,25 +36,34 @@
 // boundary
 #include "bptypeutil.hh"
 
+#if 0
 // an abstraction around python 
 #include "PythonInterpreter.hh"
+#endif // 0
 #include "PythonHeaders.hh"
 
+#if 0
 #include <map>
 #include <string>
 #include <iostream>
 
 #include <stdio.h>
 #include <stdlib.h>
+#endif // 0
 
+#if 0
 #ifdef WIN32
 #define PATHSEP "\\"
 #else
 #define PATHSEP "/"
 #endif
+#endif // 0
 
+#if 0
 const BPCFunctionTable * g_bpCoreFunctions;
+#endif // 0
 
+#if 0
 int
 BPPAllocate(void ** instance, unsigned int,
             const BPElement * contextMap)
@@ -67,13 +75,17 @@ BPPAllocate(void ** instance, unsigned int,
     // XXX failure case?
     return 0;
 }
+#endif // 0
 
+#if 0
 void
 BPPDestroy(void * instance)
 {
     python::destroyInstance(instance);
 }
+#endif // 0
 
+#if 0
 void
 BPPInvoke(void * instance, const char * funcName,
           unsigned int tid, const BPElement * elem)
@@ -82,13 +94,17 @@ BPPInvoke(void * instance, const char * funcName,
     python::invoke(instance, funcName, tid, dynamic_cast<bp::Map *>(obj));
     if (obj) delete obj;
 }
+#endif // 0
 
+#if 0
 void
 BPPShutdown(void)
 {
     python::shutdown();
 }
+#endif // 0
 
+#if 0
 // a description of this corelet.
 BPCoreletDefinition s_pythonInterpreterDef = {
     "PythonInterpreter",
@@ -97,10 +113,14 @@ BPCoreletDefinition s_pythonInterpreterDef = {
     0,
     NULL
 };
+#endif // 0
 
+#if 0
 // file scoped memory representation of the services interface.
 static bp::service::Description * s_desc = NULL;
+#endif // 0
 
+#if 0
 const BPCoreletDefinition *
 BPPAttach(unsigned int attachID, const BPElement * paramMap)
 {
@@ -149,14 +169,18 @@ BPPAttach(unsigned int attachID, const BPElement * paramMap)
 
     return (def = s_desc->toBPCoreletDefinition());
 }
+#endif // 0
 
+#if 0
 void
 BPPDetach(unsigned int attachID)
 {
     if (s_desc) delete s_desc;
     s_desc = NULL;
 }
+#endif // 0
 
+#if 0
 const BPCoreletDefinition *
 BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
               const BPElement * parameterMap)
@@ -189,7 +213,9 @@ BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
 
     return &s_pythonInterpreterDef;
 }
+#endif // 0
 
+#if 0
 /** and finally, declare the entry point to the corelet */
 BPPFunctionTable funcTable = {
     BPP_CORELET_API_VERSION,
@@ -201,7 +227,9 @@ BPPFunctionTable funcTable = {
     BPPAttach,
     BPPDetach
 };
+#endif // 0
 
+#if 0
 const BPPFunctionTable *
 BPPGetEntryPoints(void)
 {
