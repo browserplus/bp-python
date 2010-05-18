@@ -23,8 +23,7 @@ require File.join(TOPDIR, "bakery/ports/bakery")
 $order = {
   :output_dir => File.join(TOPDIR, $platform),
   :packages => [
-                "python26",
-                "python31"
+                "python26"
                ],
   :verbose => true
 }
