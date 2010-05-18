@@ -5,8 +5,8 @@
 # (c) Yahoo 2010, all rights reserved
 #####
 
-# I'm a modern man
-cmake_minimum_required(VERSION 2.6)
+# require cmake 2.8.1 or higher
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.1 FATAL_ERROR)
 
 # pull in build configuration
 INCLUDE(BuildConfigs.cmake)
@@ -56,7 +56,6 @@ ENDIF ()
 SET(extDir "${CMAKE_CURRENT_SOURCE_DIR}/../external")
 SET(extLibDir "${extDir}/${CMAKE_SYSTEM_NAME}/lib/${CMAKE_BUILD_TYPE}")
 SET(extIncDir "${extDir}/${CMAKE_SYSTEM_NAME}/include/python26")
-#SET(extIncDir "${extDir}/${CMAKE_SYSTEM_NAME}/include/python31")
 SET(CPPTOOLS_DIR "${extDir}/bp-service-tools/CppTools/src")
 
 INCLUDE_DIRECTORIES(
@@ -103,7 +102,6 @@ ADD_LIBRARY(${serviceName} MODULE ${EXT_SRCS} ${OS_SRCS} ${SRCS} ${HDRS})
 # find the path to the python library we'll link
 MESSAGE("looking in ${pythonLibPath}")
 FIND_LIBRARY(pythonDylib NAMES python2.6 python26
-#FIND_LIBRARY(pythonDylib NAMES python3.1 python31
              PATHS ${pythonLibPath}
              NO_DEFAULT_PATH
              NO_SYSTEM_ENVIRONMENT_PATH)
@@ -123,11 +121,9 @@ ENDIF (APPLE)
 
 SET(stdlibDest "${outputDir}/stdlib")
 SET(stdlibSource "${extLibDir}/python2.6")
-#SET(stdlibSource "${extLibDir}/python3.1")
 
 SET(extDest "${outputDir}/ext")
 FILE(GLOB extSource "${extLibDir}/python/2.6.5/i386-*")
-#FILE(GLOB extSource "${extLibDir}/python/3.1.2/i386-*")
 
 IF (APPLE)
     SET(RM_CMD rm -rf)
@@ -149,6 +145,8 @@ ENDIF ()
 
 MESSAGE("python library to link:  ${pythonDylib}" )
 MESSAGE("library to ship:       ${pythonLibToShip}")
+MESSAGE("python library to link:  ${pythonDylibA}" )
+MESSAGE("library to ship:       ${pythonLibToShipA}")
 
 #ADD_CUSTOM_COMMAND(
 #    TARGET ${serviceName} POST_BUILD

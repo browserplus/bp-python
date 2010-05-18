@@ -2,7 +2,8 @@
 #define __PYTHONHEADERS_HH__
 
 extern "C" {
-    #include <Python.h>
+	#define MS_NO_COREDLL
+	#include <Python.h>
 };
 
 #endif
