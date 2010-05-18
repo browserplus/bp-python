@@ -102,8 +102,8 @@ ADD_LIBRARY(${serviceName} MODULE ${EXT_SRCS} ${OS_SRCS} ${SRCS} ${HDRS})
 
 # find the path to the python library we'll link
 MESSAGE("looking in ${pythonLibPath}")
-FIND_LIBRARY(pythonDylib NAMES python2.6 msvcr90-python265
-#FIND_LIBRARY(pythonDylib NAMES python3.1 msvcr90-python312
+FIND_LIBRARY(pythonDylib NAMES python2.6 python26
+#FIND_LIBRARY(pythonDylib NAMES python3.1 python31
              PATHS ${pythonLibPath}
              NO_DEFAULT_PATH
              NO_SYSTEM_ENVIRONMENT_PATH)
