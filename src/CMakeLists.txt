@@ -148,26 +148,26 @@ MESSAGE("library to ship:       ${pythonLibToShip}")
 MESSAGE("python library to link:  ${pythonDylibA}" )
 MESSAGE("library to ship:       ${pythonLibToShipA}")
 
-#ADD_CUSTOM_COMMAND(
-#    TARGET ${serviceName} POST_BUILD
-#    COMMAND ${RM_CMD} \"${stdlibDest}\"
-#    COMMAND ${CMAKE_COMMAND} -E copy_directory
-#                        \"${stdlibSource}\" \"${stdlibDest}\"
-#    COMMAND ${CMAKE_COMMAND} -E echo
-#                        \"${stdlibSource}\" \"${stdlibDest}\"
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#            \"${CMAKE_CURRENT_SOURCE_DIR}/python/browserplus.rb\"
-#			\"${stdlibDest}\"
-#    COMMAND ${RM_CMD} \"${extDest}\"
-#    COMMAND ${CMAKE_COMMAND} -E copy_directory
-#                        \"${extSource}\" \"${extDest}\"
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#            \"${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt\"
-#            \"${outputDir}\"
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#            \"${pythonLibToShip}\"
-#            \"${outputDir}\"
-#)
+ADD_CUSTOM_COMMAND(
+    TARGET ${serviceName} POST_BUILD
+    COMMAND ${RM_CMD} \"${stdlibDest}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+                        \"${stdlibSource}\" \"${stdlibDest}\"
+    COMMAND ${CMAKE_COMMAND} -E echo
+                        \"${stdlibSource}\" \"${stdlibDest}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            \"${CMAKE_CURRENT_SOURCE_DIR}/python/browserplus.py\"
+			\"${stdlibDest}\"
+    COMMAND ${RM_CMD} \"${extDest}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+                        \"${extSource}\" \"${extDest}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            \"${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt\"
+            \"${outputDir}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            \"${pythonLibToShip}\"
+            \"${outputDir}\"
+)
 
 #IF (APPLE)  
 #  # repeat after me:  I love dylibs

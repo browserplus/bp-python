@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -46,4 +45,3 @@ python::Work::Work(python::Work::Type t)
 python::Work::~Work()
 {
 }
-#endif // 0

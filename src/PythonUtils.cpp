@@ -38,8 +38,8 @@
 
 std::string python::getLastError()
 {
-    VALUE lasterr = rb_gv_get("$!");
-    VALUE errMessage = rb_obj_as_string(lasterr);
+    PyObject* lasterr = rb_gv_get("$!");
+    PyObject* errMessage = rb_obj_as_string(lasterr);
     return RSTRING_PTR(errMessage);
 }
 
@@ -47,13 +47,13 @@ std::string python::getLastError()
 
 typedef struct 
 {
-    VALUE receiver;
+    PyObject* receiver;
     ID function;
     int nargs;
-    VALUE args[MAX_ARGS];
+    PyObject* args[MAX_ARGS];
 } FuncallArgs;
 
-static VALUE rb_funcall_proxy(VALUE arg)
+static PyObject* rb_funcall_proxy(PyObject* arg)
 {
     FuncallArgs * fa = (FuncallArgs *) arg;
     return rb_funcall2(fa->receiver,
@@ -62,8 +62,8 @@ static VALUE rb_funcall_proxy(VALUE arg)
                        fa->args);
 }
     
-VALUE
-python::invokeFunction(VALUE r, const char * funcName, int * error,
+PyObject*
+python::invokeFunction(PyObject* r, const char * funcName, int * error,
                      int nargs, ...)
 {
     FuncallArgs fa;
@@ -78,9 +78,9 @@ python::invokeFunction(VALUE r, const char * funcName, int * error,
     assert(nargs < MAX_ARGS);
     
     va_start(argh, nargs);
-    for (int i = 0; i < nargs; i++) fa.args[i] = va_arg(argh, VALUE);
+    for (int i = 0; i < nargs; i++) fa.args[i] = va_arg(argh, PyObject*);
     va_end(argh);
     
-    return rb_protect(rb_funcall_proxy, (VALUE) &fa, error);
+    return rb_protect(rb_funcall_proxy, (PyObject*) &fa, error);
 }
 #endif // 0

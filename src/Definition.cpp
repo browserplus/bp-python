@@ -41,29 +41,29 @@
 const char * python::BP_GLOBAL_DEF_SYM = "$BrowserPlusEntryPointClass";
 #define BP_EXTERNAL_REP_METHOD "to_service_description"
 
-bool extractString(VALUE hash, const char * key, std::string & where)
+bool extractString(PyObject* hash, const char * key, std::string & where)
 {
     where.clear();
-    VALUE rkey = rb_str_new2(key);
-    VALUE val = rb_hash_aref(hash, rkey);
+    PyObject* rkey = rb_str_new2(key);
+    PyObject* val = rb_hash_aref(hash, rkey);
     if (rb_type(val) != T_STRING) return false;
     where.append(RSTRING_PTR(val));
     return true;
 }
 
-bool extractNumber(VALUE hash, const char * key, unsigned int * where)
+bool extractNumber(PyObject* hash, const char * key, unsigned int * where)
 {
-    VALUE rkey = rb_str_new2(key);
-    VALUE val = rb_hash_aref(hash, rkey);
+    PyObject* rkey = rb_str_new2(key);
+    PyObject* val = rb_hash_aref(hash, rkey);
     if (rb_type(val) != T_FIXNUM) return false;
     *where = NUM2UINT(val);
     return true;
 }
 
-bool extractBool(VALUE hash, const char * key, bool * where)
+bool extractBool(PyObject* hash, const char * key, bool * where)
 {
-    VALUE rkey = rb_str_new2(key);
-    VALUE val = rb_hash_aref(hash, rkey);
+    PyObject* rkey = rb_str_new2(key);
+    PyObject* val = rb_hash_aref(hash, rkey);
     if (rb_type(val) == T_TRUE) {
         *where = true;
     } else if (rb_type(val) == T_FALSE) {
@@ -74,7 +74,7 @@ bool extractBool(VALUE hash, const char * key, bool * where)
     return true;
 }
 
-bool processArgument(VALUE hash, bp::service::Function & f,
+bool processArgument(PyObject* hash, bp::service::Function & f,
                      std::string & verboseError)
 {
     bp::service::Argument a;
@@ -130,7 +130,7 @@ bool processArgument(VALUE hash, bp::service::Function & f,
 }
 
 
-static bool processFunction(VALUE hash, bp::service::Description * desc,
+static bool processFunction(PyObject* hash, bp::service::Description * desc,
                             std::string & verboseError)
 {
     bp::service::Function f;
@@ -153,8 +153,8 @@ static bool processFunction(VALUE hash, bp::service::Description * desc,
 
     // now process the arguments
     {
-        VALUE rkey = rb_str_new2("arguments");
-        VALUE arr = rb_hash_aref(hash, rkey);
+        PyObject* rkey = rb_str_new2("arguments");
+        PyObject* arr = rb_hash_aref(hash, rkey);
         if (rb_type(arr) != T_ARRAY) {
             verboseError.append("'arguments' array missing from definition of");
             verboseError.append(f.name());
@@ -163,7 +163,7 @@ static bool processFunction(VALUE hash, bp::service::Description * desc,
         }
 
         for (long int i = 0; true ; i++) {
-            VALUE rfHash = rb_ary_entry(arr, i);
+            PyObject* rfHash = rb_ary_entry(arr, i);
             if (rb_type(rfHash) == T_NIL) break;
 
             if (rb_type(rfHash) != T_HASH) {
@@ -205,9 +205,9 @@ python::extractDefinition(std::string& verboseError)
     // class with a .to_service_description method.  This method returns
     // a stable python data structure that we can traverse to build up a
     // c++/c representation of the services interface.
-    VALUE defSym = 0;
+    PyObject* defSym = 0;
     {
-        VALUE gv = rb_gv_get(BP_GLOBAL_DEF_SYM);
+        PyObject* gv = rb_gv_get(BP_GLOBAL_DEF_SYM);
         if (rb_type(gv) != T_CLASS)
         {
             verboseError.append("python service lacks entry point class, "
@@ -270,8 +270,8 @@ python::extractDefinition(std::string& verboseError)
     
     // now process the functions
     {
-        VALUE rkey = rb_str_new2("functions");
-        VALUE arr = rb_hash_aref(defSym, rkey);
+        PyObject* rkey = rb_str_new2("functions");
+        PyObject* arr = rb_hash_aref(defSym, rkey);
         if (rb_type(arr) != T_ARRAY) {
             verboseError.append("'functions' array missing from service "
                                 "description");
@@ -280,7 +280,7 @@ python::extractDefinition(std::string& verboseError)
         }
 
         for (long int i = 0; true ; i++) {
-            VALUE rfHash = rb_ary_entry(arr, i);
+            PyObject* rfHash = rb_ary_entry(arr, i);
             if (rb_type(rfHash) == T_NIL) break;
 
             if (rb_type(rfHash) != T_HASH) {

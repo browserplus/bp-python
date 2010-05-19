@@ -1,4 +1,3 @@
-#if 0
 /**
  * ***** BEGIN LICENSE BLOCK *****
  * The contents of this file are subject to the Mozilla Public License
@@ -63,4 +62,3 @@ class Thread
 }; };
 
 #endif
-#endif // 0

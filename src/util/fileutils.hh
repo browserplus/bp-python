@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -45,4 +44,3 @@ namespace file {
 };
 
 #endif
-#endif // 0

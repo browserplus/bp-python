@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -72,4 +71,3 @@ std::string file::dirname(const std::string & path)
     }
     return path.substr(0, i);
 }
-#endif // 0

@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -82,7 +81,7 @@ namespace python
         const bp::Object * m_obj;
 
         // how the instance object is passed back and forth
-        VALUE m_instance;
+        PyObject* m_instance;
 
         // A transaction id, used in method invocation
         unsigned int m_tid;
@@ -99,4 +98,3 @@ namespace python
 };
 
 #endif
-#endif // 0

@@ -45,7 +45,6 @@
 
 #include <list>
 
-#if 0
 static char ** s_argv;
 static int s_argc = 1;
 
@@ -66,185 +65,184 @@ static void * pythonThreadFunc(void * ctx)
 
     // still unclear wether this is all right.  probably performed in
     // a thread spawned at allocation time
-    python_sysinit(&s_argc, &s_argv);
-    // XXX: no longer must call NtInitialize on win32??
-    {
-        PYTHON_INIT_STACK;
-        python_init();
-        int error = 0; 
-        python_script("BrowserPlus Embedded Python");
-        std::string rbPath = path + "/stdlib";
-        std::string soPath = path + "/ext";        
-        python_incpush(rbPath.c_str());
-        python_incpush(soPath.c_str());
+    Py_SetProgramName(s_argv[0]);
+    Py_Initialize();
+    PySys_SetArgv(s_argc, s_argv);
+#if 0
+    python_init();
+    int error = 0; 
+    python_script("BrowserPlus Embedded Python");
+    std::string pyPath = path + "/stdlib";
+    std::string soPath = path + "/ext";        
+    python_incpush(pyPath.c_str());
+    python_incpush(soPath.c_str());
 
-        bp_load_builtins();
+    bp_load_builtins();
 
-        // include "browserplus.rb" which cleans up the service authors
-        // definition semantics a bit
-        rb_require("browserplus.rb");
-        rb_require("pathname");
+    // include "browserplus.py" which cleans up the service authors
+    // definition semantics a bit
+    rb_require("browserplus.py");
+    rb_require("pathname");
 
-        // let's release the spawning thread
-        s_pythonLock.lock();
-        s_running = true;
-        s_pythonCond.signal();
-        s_pythonLock.unlock();
+    // let's release the spawning thread
+    s_pythonLock.lock();
+    s_running = true;
+    s_pythonCond.signal();
+    s_pythonLock.unlock();
 
-        // allocate a stack based container for managing anonymous
-        // object lifetime
-        python::GCArray gcArray;
+    // allocate a stack based container for managing anonymous
+    // object lifetime
+    python::GCArray gcArray;
+#endif // 0
 
-        // now we'll block and wait for work
-        while (s_running) {
-            // pop an item off the queue and process it,
-            // outside of the global data structure lock
-            python::Work * work = NULL;
+#if 0
+    // now we'll block and wait for work
+    while (s_running) {
+        // pop an item off the queue and process it,
+        // outside of the global data structure lock
+        python::Work * work = NULL;
+        
+        {
+            s_pythonLock.lock();
+            if (s_workQueue.size() > 0) {
+                work = *(s_workQueue.begin());
+                s_workQueue.erase(s_workQueue.begin());
+            } 
+            s_pythonLock.unlock();
+        }
             
-            {
-                s_pythonLock.lock();
-                if (s_workQueue.size() > 0) {
-                    work = *(s_workQueue.begin());
-                    s_workQueue.erase(s_workQueue.begin());
-                } 
-                s_pythonLock.unlock();
-            }
+        if (work == NULL) {
+            PyObject* sleepyTime = rb_float_new(0.05);
+            // run the interpreter for a little bit to let background
+            // threads continue
+            // XXX: this absolutely sucks.  How do we kick this
+            //      python thread out of sleep when new work arrives?
+            //      signals?  something that we can do from another
+            //      thread safely is needed here.
+            rb_funcall(rb_mKernel, rb_intern("sleep"), 1, sleepyTime);
+        } else {
+            if (work->m_type == python::Work::T_LoadService) {
+                // first lets update require path
+                std::string serviceDir = file::dirname(work->sarg);
+                python_incpush(serviceDir.c_str());
+
+                // read python source file
+                std::string source = file::readFile(work->sarg);
                 
-            if (work == NULL) {
-                VALUE sleepyTime = rb_float_new(0.05);
-                // run the interpreter for a little bit to let background
-                // threads continue
-                // XXX: this absolutely sucks.  How do we kick this
-                //      python thread out of sleep when new work arrives?
-                //      signals?  something that we can do from another
-                //      thread safely is needed here.
-                rb_funcall(rb_mKernel, rb_intern("sleep"), 1, sleepyTime);
-            } else {
-                if (work->m_type == python::Work::T_LoadService) {
-                    // first lets update require path
-                    std::string serviceDir = file::dirname(work->sarg);
-                    python_incpush(serviceDir.c_str());
-
-                    // read python source file
-                    std::string source = file::readFile(work->sarg);
-                    
-                    if (source.empty()) {
-                        work->m_error = true;
-                        work->m_verboseError.append("couldn't read: '" +
-                                                    work->sarg + "'");
-                    } else {
-                        int error = 0;
-                        (void) rb_eval_string_protect(source.c_str(), &error);
-                        
-                        if (error) {
-                            work->m_error = true;
-                            work->m_verboseError = python::getLastError();
-                        } else {
-                            // now it's time to pull out the global symbol
-                            // $BrowserPlusEntryPointClass
-                            // and call its to_service_description method
-                            // and we'll get a python data structure we can
-                            // traverse to discover the python interface
-                            work->m_desc =
-                                python::extractDefinition(work->m_verboseError);
-                            if (work->m_desc == NULL) {
-                                work->m_error = true;
-                            }
-                        }
-                    }
-                }
-                else if (work->m_type == python::Work::T_AllocateInstance)
-                {
+                if (source.empty()) {
+                    work->m_error = true;
+                    work->m_verboseError.append("couldn't read: '" +
+                                                work->sarg + "'");
+                } else {
                     int error = 0;
-                    VALUE klass = rb_gv_get(python::BP_GLOBAL_DEF_SYM);
-
-                    // initialize arguments
-                    VALUE initArgs = bpObjectToPython(work->m_obj, 0);
-                    int takesArg = 0;
-                    ID initialize = rb_intern("initialize");
-                    if (rb_method_boundp(klass, initialize, 0))
-                    {
-                        VALUE initMeth = 
-                            python::invokeFunction(
-                                klass, "instance_method", &error,
-                                1, ID2SYM(initialize));
-
-                        if (initMeth) {
-                            VALUE arity = python::invokeFunction(
-                                initMeth, "arity", &error, 0);
-                            if (NUM2INT(arity) >= 1) {
-                                takesArg = 1;
-                            }
-                        }
-                    }
+                    (void) rb_eval_string_protect(source.c_str(), &error);
                     
-                    work->m_instance =
-                        python::invokeFunction(klass, "new", &error, takesArg,
-                                             initArgs);
-
                     if (error) {
                         work->m_error = true;
                         work->m_verboseError = python::getLastError();
                     } else {
-                        gcArray.Register(work->m_instance);
+                        // now it's time to pull out the global symbol
+                        // $BrowserPlusEntryPointClass
+                        // and call its to_service_description method
+                        // and we'll get a python data structure we can
+                        // traverse to discover the python interface
+                        work->m_desc =
+                            python::extractDefinition(work->m_verboseError);
+                        if (work->m_desc == NULL) {
+                            work->m_error = true;
+                        }
                     }
-                }
-                else if (work->m_type == python::Work::T_InvokeMethod)
-                {
-                    int error = 0;
-                    VALUE tid = rb_uint_new(work->m_tid);
-                    VALUE trans = rb_class_new_instance(1, &tid,
-                                                        bp_rb_cTransaction);
-
-                    g_bpCoreFunctions->log(
-                        BP_DEBUG, "executing func '%s'",
-                        work->sarg.c_str());
-
-                    python::invokeFunction(
-                        work->m_instance, work->sarg.c_str(),
-                        &error, 2, trans,
-                        bpObjectToPython(work->m_obj, work->m_tid));
-
-                    if (error) {
-                        g_bpCoreFunctions->postError(
-                            work->m_tid, "python.evalError",
-                            python::getLastError().c_str());
-                    }
-
-                    if (work->m_obj) {
-                        delete work->m_obj;
-                        work->m_obj = NULL;
-                    }
-                } else if (work->m_type == python::Work::T_ReleaseInstance) {
-                    if (rb_method_boundp(CLASS_OF(work->m_instance),
-                                         rb_intern("destroy"), 1))
-                    {
-                        (void) python::invokeFunction(work->m_instance,
-                                                    "destroy", &error, 0);
-                    }
-                    
-                    gcArray.Unregister(work->m_instance);
-                }
-
-                // presence of syncLock indicates synchronous operation
-                // (client freed)
-                if (work->m_syncLock != NULL) {
-                    work->m_syncLock->lock();
-                    work->m_done = true;
-                    work->m_syncCond->signal();
-                    work->m_syncLock->unlock();
-                } else {
-                    delete work;
                 }
             }
+            else if (work->m_type == python::Work::T_AllocateInstance)
+            {
+                int error = 0;
+                PyObject* klass = rb_gv_get(python::BP_GLOBAL_DEF_SYM);
+
+                // initialize arguments
+                PyObject* initArgs = bpObjectToPython(work->m_obj, 0);
+                int takesArg = 0;
+                ID initialize = rb_intern("initialize");
+                if (rb_method_boundp(klass, initialize, 0))
+                {
+                    PyObject* initMeth = 
+                        python::invokeFunction(
+                            klass, "instance_method", &error,
+                            1, ID2SYM(initialize));
+
+                    if (initMeth) {
+                        PyObject* arity = python::invokeFunction(
+                            initMeth, "arity", &error, 0);
+                        if (NUM2INT(arity) >= 1) {
+                            takesArg = 1;
+                        }
+                    }
+                }
+                
+                work->m_instance =
+                    python::invokeFunction(klass, "new", &error, takesArg,
+                                         initArgs);
+
+                if (error) {
+                    work->m_error = true;
+                    work->m_verboseError = python::getLastError();
+                } else {
+                    gcArray.Register(work->m_instance);
+                }
+            }
+            else if (work->m_type == python::Work::T_InvokeMethod)
+            {
+                int error = 0;
+                PyObject* tid = rb_uint_new(work->m_tid);
+                PyObject* trans = rb_class_new_instance(1, &tid,
+                                                    bp_rb_cTransaction);
+
+                g_bpCoreFunctions->log(
+                    BP_DEBUG, "executing func '%s'",
+                    work->sarg.c_str());
+
+                python::invokeFunction(
+                    work->m_instance, work->sarg.c_str(),
+                    &error, 2, trans,
+                    bpObjectToPython(work->m_obj, work->m_tid));
+
+                if (error) {
+                    g_bpCoreFunctions->postError(
+                        work->m_tid, "python.evalError",
+                        python::getLastError().c_str());
+                }
+
+                if (work->m_obj) {
+                    delete work->m_obj;
+                    work->m_obj = NULL;
+                }
+            } else if (work->m_type == python::Work::T_ReleaseInstance) {
+                if (rb_method_boundp(CLASS_OF(work->m_instance),
+                                     rb_intern("destroy"), 1))
+                {
+                    (void) python::invokeFunction(work->m_instance,
+                                                "destroy", &error, 0);
+                }
+                
+                gcArray.Unregister(work->m_instance);
+            }
+
+            // presence of syncLock indicates synchronous operation
+            // (client freed)
+            if (work->m_syncLock != NULL) {
+                work->m_syncLock->lock();
+                work->m_done = true;
+                work->m_syncCond->signal();
+                work->m_syncLock->unlock();
+            } else {
+                delete work;
+            }
         }
-        
-
-        // now we'll block and wait for work
-        s_pythonLock.unlock();
-
-        // XXX
     }
+#endif // 0
+
+    // now we'll block and wait for work
+    s_pythonLock.unlock();
 
     return NULL;
 }
@@ -276,11 +274,9 @@ static void runWorkASync(python::Work * work)
     s_pythonCond.signal();
     s_pythonLock.unlock();
 }
-#endif // 0
 
 void python::initialize(const std::string & path)
 {
-#if 0
     if (!s_running) {
         s_pythonLock.lock();
         if (s_pythonThread.run(pythonThreadFunc, (void *) path.c_str())) {
@@ -288,13 +284,10 @@ void python::initialize(const std::string & path)
         }
         s_pythonLock.unlock();        
     }
-#endif // 0
-    Py_Initialize();
 }
 
 void python::shutdown(void)
 {
-#if 0
     // stop the python thread!
     if (s_running) {
         s_pythonLock.lock();
@@ -303,7 +296,6 @@ void python::shutdown(void)
         s_pythonLock.unlock();
         s_pythonThread.join();
     }
-#endif // 0    
     Py_Finalize();
 }
 
@@ -351,7 +343,7 @@ python::invoke(void * instance, const char * funcName,
     // set up a dynamically allocated structure with information about
     // the method invocation
     python::Work * work = new python::Work(python::Work::T_InvokeMethod);
-    work->m_instance = (VALUE) instance;
+    work->m_instance = (PyObject*) instance;
     work->sarg.append(funcName);
     work->m_tid = tid;
     if (arguments) { work->m_obj = arguments->clone(); }
@@ -366,7 +358,7 @@ void
 python::destroyInstance(void * instance)
 {
     python::Work work(python::Work::T_ReleaseInstance);
-    work.m_instance = (VALUE) instance;
+    work.m_instance = (PyObject*) instance;
     runWorkSync(&work);
 }
 #endif // 0

@@ -1,4 +1,3 @@
-#if 0
 /**
  * ***** BEGIN LICENSE BLOCK *****
  * The contents of this file are subject to the Mozilla Public License
@@ -85,4 +84,3 @@ namespace sync {
 }}
 
 #endif
-#endif // 0

@@ -30,7 +30,7 @@
  */
 
 /**
- * DataMapping.h - tools to map data back and forth from python's VALUE to
+ * DataMapping.h - tools to map data back and forth from python's PyObject* to
  *                 bp::Object 
  */
 
@@ -39,9 +39,9 @@
 
 #include "bptypeutil.hh"
 
-bp::Object * pythonToBPObject(unsigned long int /*VALUE*/ v);
+bp::Object * pythonToBPObject(unsigned long int /*PyObject**/ v);
 
-unsigned long int /*VALUE*/ bpObjectToPython(const bp::Object * obj,
+unsigned long int /*PyObject**/ bpObjectToPython(const bp::Object * obj,
                                            unsigned int tid);
 
 #endif

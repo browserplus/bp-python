@@ -30,7 +30,7 @@
  */
 
 /**
- * DataMapping.cpp - tools to map data back and forth from python's VALUE to
+ * DataMapping.cpp - tools to map data back and forth from python's PyObject* to
  *                 bp::Object 
  */
 
@@ -40,7 +40,7 @@
 
 #include "bpurlutil.hh"
 
-static int hashPopulator(VALUE key, VALUE value, VALUE callbackData)
+static int hashPopulator(PyObject* key, PyObject* value, PyObject* callbackData)
 {
     bp::Map * m = (bp::Map *) callbackData;
     m->add(RSTRING_PTR(key), pythonToBPObject(value));
@@ -48,7 +48,7 @@ static int hashPopulator(VALUE key, VALUE value, VALUE callbackData)
 }
 
 bp::Object *
-pythonToBPObject(VALUE v)
+pythonToBPObject(PyObject* v)
 {
     bp::Object * obj = NULL;
     
@@ -72,7 +72,7 @@ pythonToBPObject(VALUE v)
             obj = new bp::Map;
             rb_hash_foreach(v,
                             (int (*)(ANYARGS)) hashPopulator,
-                            (VALUE) obj);
+                            (PyObject*) obj);
             break;
         case T_ARRAY:
         {
@@ -86,19 +86,19 @@ pythonToBPObject(VALUE v)
         break;
         case T_OBJECT: {
             // map Pathname objects into BPTPath types
-            VALUE id = rb_intern("Pathname");
-            VALUE klass = 0;
+            PyObject* id = rb_intern("Pathname");
+            PyObject* klass = 0;
             if (rb_const_defined(rb_cObject, id) &&
                 (klass = rb_const_get(rb_cObject, id)) &&
                 TYPE(klass) == T_CLASS)
             {
-                VALUE r = rb_obj_is_kind_of(v, klass);
+                PyObject* r = rb_obj_is_kind_of(v, klass);
                 if (RTEST(r)) {
                     // convert to abs path
                     int error = 0;
-                    VALUE absPath =
+                    PyObject* absPath =
                         python::invokeFunction(v, "realpath", &error, 0);
-                    VALUE pathString =
+                    PyObject* pathString =
                         python::invokeFunction(absPath, "to_s", &error, 0);
                     if (!error && TYPE(pathString) == T_STRING) {
                         std::string uri =
@@ -118,13 +118,13 @@ pythonToBPObject(VALUE v)
     return obj;
 }
 
-VALUE
+PyObject*
 bpObjectToPython(const bp::Object * obj,
                unsigned int tid)
 {
     if (obj == NULL) return Qnil;
 
-    VALUE v = Qnil;
+    PyObject* v = Qnil;
 
     switch (obj->type()) {
         case BPTNull:
@@ -140,7 +140,7 @@ bpObjectToPython(const bp::Object * obj,
             v = rb_ull2inum(((bp::Integer *) obj)->value());
             break;
         case BPTCallBack: {
-            VALUE args[2];
+            PyObject* args[2];
             args[0] = rb_uint2inum(tid);
             args[1] = rb_ull2inum(((bp::Integer *) obj)->value());
             v = rb_class_new_instance(2, args, bp_rb_cCallback);
@@ -153,15 +153,15 @@ bpObjectToPython(const bp::Object * obj,
             v = rb_str_new2(((bp::String *) obj)->value());
             break;
         case BPTPath: {
-            VALUE id = rb_intern("Pathname");
-            VALUE klass = 0;
+            PyObject* id = rb_intern("Pathname");
+            PyObject* klass = 0;
             if (rb_const_defined(rb_cObject, id) &&
                 (klass = rb_const_get(rb_cObject, id)) &&
                 TYPE(klass) == T_CLASS)
             {
                 std::string url = ((bp::Path *) obj)->value();
                 std::string path = bp::urlutil::pathFromURL(url);
-                VALUE p = rb_str_new2(path.c_str());
+                PyObject* p = rb_str_new2(path.c_str());
                 v = rb_class_new_instance(1, &p, klass);
             }
             break;

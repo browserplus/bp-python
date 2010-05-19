@@ -40,26 +40,26 @@
 
 #include "PythonHeaders.hh"
 
-VALUE bp_rb_cTransaction;
-VALUE bp_rb_cCallback;
+PyObject* bp_rb_cTransaction;
+PyObject* bp_rb_cCallback;
 
-static VALUE
-trans_init(VALUE obj, VALUE tid)
+static PyObject*
+trans_init(PyObject* obj, PyObject* tid)
 {
     (void) rb_ivar_set(obj, rb_intern("tid"), tid);
     return Qtrue;
 }
 
-static VALUE
-trans_tid(VALUE obj)
+static PyObject*
+trans_tid(PyObject* obj)
 {
     return rb_ivar_get(obj, rb_intern("tid"));
 }
 
-static VALUE
-trans_complete(int argc, VALUE * argv, VALUE obj)
+static PyObject*
+trans_complete(int argc, PyObject* * argv, PyObject* obj)
 {
-    VALUE tidVal = rb_ivar_get(obj, rb_intern("tid"));
+    PyObject* tidVal = rb_ivar_get(obj, rb_intern("tid"));
 
     if (TYPE(tidVal) != T_FIXNUM && TYPE(tidVal) != T_BIGNUM) {
         rb_raise(rb_eException, "internal error, incorrect 'tid' ivar");
@@ -81,14 +81,14 @@ trans_complete(int argc, VALUE * argv, VALUE obj)
 
 // keeping track of outstanding procs
 static bp::sync::Mutex s_lock;
-std::map<unsigned int, VALUE> s_outstandingPrompts;
+std::map<unsigned int, PyObject*> s_outstandingPrompts;
 
 static void dummyCB(void * context, unsigned int promptId,
                     const BPElement * response)
 {
     s_lock.lock();
     // figure out if we know about this prompt id
-    std::map<unsigned int, VALUE>::iterator it;
+    std::map<unsigned int, PyObject*>::iterator it;
     it = s_outstandingPrompts.find(promptId);
     if (it != s_outstandingPrompts.end()) {
 //         PythonInvokeProc(it->second, &(it->second),
@@ -99,10 +99,10 @@ static void dummyCB(void * context, unsigned int promptId,
     s_lock.unlock();
 }
 
-static VALUE
-trans_prompt(int argc, VALUE * argv, VALUE obj)
+static PyObject*
+trans_prompt(int argc, PyObject* * argv, PyObject* obj)
 {
-    VALUE tidVal = rb_ivar_get(obj, rb_intern("tid"));
+    PyObject* tidVal = rb_ivar_get(obj, rb_intern("tid"));
 
     if (TYPE(tidVal) != T_FIXNUM && TYPE(tidVal) != T_BIGNUM) {
         rb_raise(rb_eException, "internal error, incorrect 'tid' ivar");
@@ -125,7 +125,7 @@ trans_prompt(int argc, VALUE * argv, VALUE obj)
                                                dummyCB, NULL);
 
     // grab the passed in block and increment a reference to it
-    VALUE val = rb_block_proc();
+    PyObject* val = rb_block_proc();
     s_outstandingPrompts[x] = val;
     rb_gc_register_address(&s_outstandingPrompts[x]);
     s_lock.unlock();
@@ -138,10 +138,10 @@ trans_prompt(int argc, VALUE * argv, VALUE obj)
     return Qnil;
 }
 
-static VALUE
-trans_error(int argc, VALUE * argv, VALUE obj)
+static PyObject*
+trans_error(int argc, PyObject* * argv, PyObject* obj)
 {
-    VALUE tidVal = rb_ivar_get(obj, rb_intern("tid"));
+    PyObject* tidVal = rb_ivar_get(obj, rb_intern("tid"));
     const char * error = "unknownError";
     const char * verboseError = NULL;
 
@@ -153,8 +153,8 @@ trans_error(int argc, VALUE * argv, VALUE obj)
     
     unsigned int tid = NUM2UINT(tidVal);
 
-    VALUE errorVal = (argc > 0) ? argv[0] : 0;
-    VALUE verboseErrorVal = (argc > 1) ? argv[1] : 0;    
+    PyObject* errorVal = (argc > 0) ? argv[0] : 0;
+    PyObject* verboseErrorVal = (argc > 1) ? argv[1] : 0;    
 
     if (errorVal) {
         if (TYPE(errorVal) != T_STRING) {
@@ -173,36 +173,36 @@ trans_error(int argc, VALUE * argv, VALUE obj)
     return Qnil;
 }
 
-static VALUE
-callb_init(VALUE obj, VALUE tid, VALUE cid)
+static PyObject*
+callb_init(PyObject* obj, PyObject* tid, PyObject* cid)
 {
     (void) rb_ivar_set(obj, rb_intern("tid"), tid);
     (void) rb_ivar_set(obj, rb_intern("cid"), cid);
     return Qtrue;
 }
 
-static VALUE
-callb_tid(VALUE obj)
+static PyObject*
+callb_tid(PyObject* obj)
 {
     return rb_ivar_get(obj, rb_intern("tid"));
 }
 
-static VALUE
-callb_cid(VALUE obj)
+static PyObject*
+callb_cid(PyObject* obj)
 {
     return rb_ivar_get(obj, rb_intern("cid"));
 }
 
-static VALUE
-callb_invoke(int argc, VALUE * argv, VALUE obj)
+static PyObject*
+callb_invoke(int argc, PyObject* * argv, PyObject* obj)
 {
     if (argc > 1) rb_raise(rb_eArgError, "wrong number of arguments");
 
     unsigned int tid = 0;
     BPCallBack cid = 0;
 
-    VALUE tidVal = callb_tid(obj);
-    VALUE cidVal = callb_cid(obj);
+    PyObject* tidVal = callb_tid(obj);
+    PyObject* cidVal = callb_cid(obj);
 
     if (TYPE(tidVal) != T_FIXNUM && TYPE(tidVal) != T_BIGNUM) {
         rb_raise(rb_eException, "internal error, incorrect 'tid' ivar");
@@ -235,24 +235,24 @@ bp_load_builtins()
     
     bp_rb_cTransaction = rb_define_class("BPTransaction", rb_cObject);
     rb_define_method(bp_rb_cTransaction, "initialize",
-                     (VALUE (*)(...)) trans_init, 1);
+                     (PyObject* (*)(...)) trans_init, 1);
     rb_define_method(bp_rb_cTransaction, "complete",
-                     (VALUE (*)(...)) trans_complete, -1);
+                     (PyObject* (*)(...)) trans_complete, -1);
     rb_define_method(bp_rb_cTransaction, "prompt",
-                     (VALUE (*)(...)) trans_prompt, -1);
+                     (PyObject* (*)(...)) trans_prompt, -1);
     rb_define_method(bp_rb_cTransaction, "error",
-                     (VALUE (*)(...)) trans_error, -1);
+                     (PyObject* (*)(...)) trans_error, -1);
     rb_define_method(bp_rb_cTransaction, "tid",
-                     (VALUE (*)(...)) trans_tid, 0);
+                     (PyObject* (*)(...)) trans_tid, 0);
     
     bp_rb_cCallback = rb_define_class("BPCallback", rb_cObject);
     rb_define_method(bp_rb_cCallback, "initialize",
-                     (VALUE (*)(...)) callb_init, 2);
+                     (PyObject* (*)(...)) callb_init, 2);
     rb_define_method(bp_rb_cCallback, "invoke",
-                     (VALUE (*)(...)) callb_invoke, -1);
+                     (PyObject* (*)(...)) callb_invoke, -1);
     rb_define_method(bp_rb_cCallback, "tid",
-                     (VALUE (*)(...)) callb_tid, 0);
+                     (PyObject* (*)(...)) callb_tid, 0);
     rb_define_method(bp_rb_cCallback, "cid",
-                     (VALUE (*)(...)) callb_cid, 0);
+                     (PyObject* (*)(...)) callb_cid, 0);
 }
 #endif // 0

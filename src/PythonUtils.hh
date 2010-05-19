@@ -43,7 +43,7 @@ namespace python {
 
     /** simplified invocation of a function upon a reciever while catching
      *  errors */
-    VALUE invokeFunction(VALUE r, const char * funcName, int * error,
+    PyObject* invokeFunction(PyObject* r, const char * funcName, int * error,
                          int nargs, ...);
 
     // This little class is taken from
@@ -65,14 +65,14 @@ namespace python {
             // dispose array and flush all elements
             rb_gc_unregister_address(&objects);
         }
-        void Register(VALUE object) {
+        void Register(PyObject* object) {
             rb_ary_push(objects, object);
         }
-        void Unregister(VALUE object) {
+        void Unregister(PyObject* object) {
             rb_ary_delete(objects, object);
         }
     private:
-        VALUE objects;
+        PyObject* objects;
     };
 
 };

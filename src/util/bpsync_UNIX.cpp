@@ -1,4 +1,3 @@
-#if 0
 /**
  * ***** BEGIN LICENSE BLOCK *****
  * The contents of this file are subject to the Mozilla Public License
@@ -114,4 +113,3 @@ bp::sync::Condition::timeWait(Mutex * m, unsigned int msec)
     // error, we assume timeout. 
     return (ret == 0);
 }
-#endif // 0
