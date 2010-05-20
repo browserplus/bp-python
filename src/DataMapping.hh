@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -45,4 +44,3 @@ unsigned long int /*PyObject**/ bpObjectToPython(const bp::Object * obj,
                                            unsigned int tid);
 
 #endif
-#endif // 0

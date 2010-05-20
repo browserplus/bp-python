@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -37,6 +36,7 @@
 
 #include "PythonHeaders.hh"
 
+#if 0
 namespace python {
     /** get the last error encountered from the python evaluation environment */
     std::string getLastError();
@@ -76,6 +76,6 @@ namespace python {
     };
 
 };
+#endif // 0
 
 #endif
-#endif // 0

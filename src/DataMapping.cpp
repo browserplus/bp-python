@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -40,50 +39,59 @@
 
 #include "bpurlutil.hh"
 
-static int hashPopulator(PyObject* key, PyObject* value, PyObject* callbackData)
-{
-    bp::Map * m = (bp::Map *) callbackData;
-    m->add(RSTRING_PTR(key), pythonToBPObject(value));
-    return ST_CONTINUE;
-}
-
 bp::Object *
 pythonToBPObject(PyObject* v)
 {
     bp::Object * obj = NULL;
-    
-    switch (TYPE(v)) {
-        case T_FLOAT:
-            obj = new bp::Double(rb_num2dbl(v));
-            break;
-        case T_STRING:
-            obj = new bp::String(RSTRING_PTR(v));
-            break;
-        case T_FIXNUM:
-            obj = new bp::Integer(rb_num2ull(v));
-            break;
-        case T_TRUE:
+
+    // Python APIs don't have NULL guards, so we must do it.
+    if (v == NULL) {
+        obj = new bp::Null();
+    }
+    else if (PyBool_Check(v)) {
+        if (v == Py_True) {
             obj = new bp::Bool(true);
-            break;
-        case T_FALSE:
-            obj = new bp::Bool(false);
-            break;
-        case T_HASH:
-            obj = new bp::Map;
-            rb_hash_foreach(v,
-                            (int (*)(ANYARGS)) hashPopulator,
-                            (PyObject*) obj);
-            break;
-        case T_ARRAY:
-        {
-            long i;
-            bp::List * l = new bp::List;
-            for (i=0; i < RARRAY_LEN(v); i++) {
-                l->append(pythonToBPObject(rb_ary_entry(v, i)));
-            }
-            obj = l;
         }
-        break;
+        else if (v == Py_False) {
+            obj = new bp::Bool(false);
+        }
+    }
+    else if (PyInt_Check(v)) {
+        obj = new bp::Integer(PyInt_AS_LONG(v));
+    }
+    else if (PyLong_Check(v)) {
+        obj = new bp::Integer(PyInt_AsLong(v));
+    }
+    else if (PyFloat_Check(v)) {
+        obj = new bp::Double(PyFloat_AS_DOUBLE(v));
+    }
+    else if (PyString_Check(v)) {
+        obj = new bp::String(PyString_AS_STRING(v));
+    }
+    else if (PyDict_Check(v)) {
+        bp::Map * m = new bp::Map;
+        PyObject* key;
+        PyObject* value;
+        Py_ssize_t pos = 0;
+        while (PyDict_Next(v, &pos, &key, &value)) {
+            m->add(PyString_AS_STRING(key), pythonToBPObject(value));
+        }
+        obj = m;
+    }
+    else if (PyList_Check(v)) {
+        Py_ssize_t i;
+        bp::List * l = new bp::List;
+        for (i=0; i < PyList_GET_SIZE(v); i++) {
+            l->append(pythonToBPObject(PyList_GET_ITEM(v, i)));
+        }
+        obj = l;
+    }
+    else {
+        obj = new bp::Null();
+    }
+///////
+#if 0
+    switch (TYPE(v)) {
         case T_OBJECT: {
             // map Pathname objects into BPTPath types
             PyObject* id = rb_intern("Pathname");
@@ -109,49 +117,70 @@ pythonToBPObject(PyObject* v)
                 }
             }
         }
-        case T_NIL:
-        default:
-            obj = new bp::Null();
-            break;
     }
-    
+#endif // 0
     return obj;
 }
 
-PyObject*
+unsigned long int /*PyObject**/
 bpObjectToPython(const bp::Object * obj,
                unsigned int tid)
 {
-    if (obj == NULL) return Qnil;
+    if (obj == NULL) {
+        //(unsigned long int)Py_RETURN_NONE;
+        return (unsigned long int)Py_None;
+    }
 
-    PyObject* v = Qnil;
+    // To avoid multiple allocations, temporarily use NULL instead of Py_None
+    PyObject* v = NULL;
 
     switch (obj->type()) {
         case BPTNull:
-            v = Qnil;
+            v = NULL;
             break;
         case BPTBoolean:
         {
-            if (((bp::Bool *) obj)->value()) v = Qtrue;
-            else v = Qfalse;
+            if (((bp::Bool *) obj)->value()) v = Py_True;
+            else v = Py_False;
             break;
         }
         case BPTInteger:
-            v = rb_ull2inum(((bp::Integer *) obj)->value());
+            v = PyInt_FromLong(((bp::Integer *) obj)->value());
             break;
-        case BPTCallBack: {
-            PyObject* args[2];
-            args[0] = rb_uint2inum(tid);
-            args[1] = rb_ull2inum(((bp::Integer *) obj)->value());
-            v = rb_class_new_instance(2, args, bp_rb_cCallback);
-            break;
-        }           
         case BPTDouble:
-            v = rb_float_new(((bp::Double *) obj)->value());
+            v = PyFloat_FromDouble(((bp::Double *) obj)->value());
             break;
         case BPTString:
-            v = rb_str_new2(((bp::String *) obj)->value());
+            v = PyString_FromString(((bp::String *) obj)->value());
             break;
+        case BPTMap: 
+        {
+            bp::Map * m = (bp::Map *) obj;
+            v = PyDict_New();
+            bp::Map::Iterator i(*m);
+            const char * key;
+            while (NULL != (key = i.nextKey())) {
+                PyDict_SetItem(v,PyString_FromString(key), 
+                             (PyObject*)bpObjectToPython(m->value(key), tid));
+            }
+            
+            break;
+        }
+        
+        case BPTList: 
+        {
+            bp::List * l = (bp::List *) obj;
+
+            v = PyList_New(l->size());
+            
+            unsigned int i;
+            for (i=0; i < l->size(); i++) {
+                PyList_Append(v, (PyObject*)bpObjectToPython(l->value(i), tid));
+            }
+            
+            break;
+        }
+#if 0
         case BPTPath: {
             PyObject* id = rb_intern("Pathname");
             PyObject* klass = 0;
@@ -166,38 +195,25 @@ bpObjectToPython(const bp::Object * obj,
             }
             break;
         }
-        case BPTMap: 
-        {
-            bp::Map * m = (bp::Map *) obj;
-            v = rb_hash_new();
-            bp::Map::Iterator i(*m);
-            const char * key;
-            while (NULL != (key = i.nextKey())) {
-                rb_hash_aset(v,ID2SYM(rb_intern(key)), 
-                             bpObjectToPython(m->value(key), tid));
-            }
-            
+#endif // 0
+#if 0
+        case BPTCallBack: {
+            PyObject* args[2];
+            args[0] = rb_uint2inum(tid);
+            args[1] = rb_ull2inum(((bp::Integer *) obj)->value());
+            v = rb_class_new_instance(2, args, bp_rb_cCallback);
             break;
-        }
-        
-        case BPTList: 
-        {
-            bp::List * l = (bp::List *) obj;
-
-            v = rb_ary_new();
-            
-            unsigned int i;
-            for (i=0; i < l->size(); i++) {
-                rb_ary_push(v, bpObjectToPython(l->value(i), tid));
-            }
-            
-            break;
-        }
+        }           
+#endif // 0
         case BPTAny: 
             // invalid
             break;
     }
-    
-    return v;
+
+    // To avoid multiple allocations
+    if (v == NULL) {
+        //(unsigned long int)Py_RETURN_NONE;
+        return (unsigned long int)Py_None;
+    }
+    return (unsigned long int)v;
 }
-#endif // 0
