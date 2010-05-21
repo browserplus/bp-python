@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -37,11 +36,10 @@
 #ifndef __BUILTINS_H__
 #define __BUILTINS_H__
 
-extern unsigned long bp_rb_cTransaction;
-extern unsigned long bp_rb_cCallback;
+extern unsigned long bp_py_cTransaction;
+extern unsigned long bp_py_cCallback;
 
 // bind builtin classes to python evaluation context.
 void bp_load_builtins();
 
 #endif
-#endif // 0

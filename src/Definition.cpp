@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -41,6 +40,7 @@
 const char * python::BP_GLOBAL_DEF_SYM = "$BrowserPlusEntryPointClass";
 #define BP_EXTERNAL_REP_METHOD "to_service_description"
 
+#if 0
 bool extractString(PyObject* hash, const char * key, std::string & where)
 {
     where.clear();
@@ -196,11 +196,13 @@ formatError(const char * e)
     ss << e << ": " << python::getLastError();
     return ss.str();
 }
+#endif // 0
 
 
 bp::service::Description *
 python::extractDefinition(std::string& verboseError)
 {
+#if 0
     // Global variable "$BrowserPlusEntryPointClass" will reference a 
     // class with a .to_service_description method.  This method returns
     // a stable python data structure that we can traverse to build up a
@@ -228,11 +230,13 @@ python::extractDefinition(std::string& verboseError)
             return NULL;
         }
     }
+#endif // 0
 
     // now we have a HASH ready to traverse!
 
     bp::service::Description * desc = new bp::service::Description;
 
+#if 0
     // first grab the name of the service
     std::string s;
     if (!extractString(defSym, "name", s)) {
@@ -297,7 +301,7 @@ python::extractDefinition(std::string& verboseError)
             }
         }
     }
+#endif // 0
 
     return desc;
 }
-#endif // 0

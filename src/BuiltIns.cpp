@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -40,9 +39,10 @@
 
 #include "PythonHeaders.hh"
 
-PyObject* bp_rb_cTransaction;
-PyObject* bp_rb_cCallback;
+unsigned long /*PyObject**/ bp_py_cTransaction;
+unsigned long /*PyObject**/ bp_py_cCallback;
 
+#if 0
 static PyObject*
 trans_init(PyObject* obj, PyObject* tid)
 {
@@ -225,6 +225,7 @@ callb_invoke(int argc, PyObject* * argv, PyObject* obj)
 
     return Qnil;
 }
+#endif // 0
 
 void
 bp_load_builtins()
@@ -232,27 +233,28 @@ bp_load_builtins()
     static bool initd = false;
     assert(!initd);
     initd = true;
-    
-    bp_rb_cTransaction = rb_define_class("BPTransaction", rb_cObject);
-    rb_define_method(bp_rb_cTransaction, "initialize",
+
+#if 0    
+    bp_py_cTransaction = rb_define_class("BPTransaction", rb_cObject);
+    rb_define_method(bp_py_cTransaction, "initialize",
                      (PyObject* (*)(...)) trans_init, 1);
-    rb_define_method(bp_rb_cTransaction, "complete",
+    rb_define_method(bp_py_cTransaction, "complete",
                      (PyObject* (*)(...)) trans_complete, -1);
-    rb_define_method(bp_rb_cTransaction, "prompt",
+    rb_define_method(bp_py_cTransaction, "prompt",
                      (PyObject* (*)(...)) trans_prompt, -1);
-    rb_define_method(bp_rb_cTransaction, "error",
+    rb_define_method(bp_py_cTransaction, "error",
                      (PyObject* (*)(...)) trans_error, -1);
-    rb_define_method(bp_rb_cTransaction, "tid",
+    rb_define_method(bp_py_cTransaction, "tid",
                      (PyObject* (*)(...)) trans_tid, 0);
     
-    bp_rb_cCallback = rb_define_class("BPCallback", rb_cObject);
-    rb_define_method(bp_rb_cCallback, "initialize",
+    bp_py_cCallback = rb_define_class("BPCallback", rb_cObject);
+    rb_define_method(bp_py_cCallback, "initialize",
                      (PyObject* (*)(...)) callb_init, 2);
-    rb_define_method(bp_rb_cCallback, "invoke",
+    rb_define_method(bp_py_cCallback, "invoke",
                      (PyObject* (*)(...)) callb_invoke, -1);
-    rb_define_method(bp_rb_cCallback, "tid",
+    rb_define_method(bp_py_cCallback, "tid",
                      (PyObject* (*)(...)) callb_tid, 0);
-    rb_define_method(bp_rb_cCallback, "cid",
+    rb_define_method(bp_py_cCallback, "cid",
                      (PyObject* (*)(...)) callb_cid, 0);
+#endif // 0    
 }
-#endif // 0

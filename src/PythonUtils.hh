@@ -33,10 +33,10 @@
 #define __PYTHONUTILS_HH__
 
 #include <string>
+#include <map>
 
 #include "PythonHeaders.hh"
 
-#if 0
 namespace python {
     /** get the last error encountered from the python evaluation environment */
     std::string getLastError();
@@ -58,24 +58,32 @@ namespace python {
     class GCArray {
     public:
         GCArray() {
-            objects = rb_ary_new();
-            rb_gc_register_address(&objects);
         }
         ~GCArray() {
             // dispose array and flush all elements
-            rb_gc_unregister_address(&objects);
+            while (!objects.empty()) {
+                std::map<PyObject*,PyObject*>::iterator i = objects.begin();
+                Py_DECREF(i->second);
+                objects.erase(i);
+            }
         }
         void Register(PyObject* object) {
-            rb_ary_push(objects, object);
+            objects[object] = object;
+            Py_INCREF(object);
         }
         void Unregister(PyObject* object) {
-            rb_ary_delete(objects, object);
+            for (std::map<PyObject*,PyObject*>::iterator i = objects.begin(); i != objects.end(); i++) {
+                if (i->first == object) {
+                    Py_DECREF(i->second);
+                    objects.erase(i);
+                    break;
+                }
+            }
         }
     private:
-        PyObject* objects;
+        std::map<PyObject*,PyObject*> objects;
     };
 
 };
-#endif // 0
 
 #endif

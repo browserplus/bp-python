@@ -127,7 +127,7 @@ bpObjectToPython(const bp::Object * obj,
                unsigned int tid)
 {
     if (obj == NULL) {
-        //(unsigned long int)Py_RETURN_NONE;
+        Py_INCREF(Py_None);
         return (unsigned long int)Py_None;
     }
 
@@ -201,7 +201,7 @@ bpObjectToPython(const bp::Object * obj,
             PyObject* args[2];
             args[0] = rb_uint2inum(tid);
             args[1] = rb_ull2inum(((bp::Integer *) obj)->value());
-            v = rb_class_new_instance(2, args, bp_rb_cCallback);
+            v = rb_class_new_instance(2, args, bp_py_cCallback);
             break;
         }           
 #endif // 0
@@ -212,7 +212,7 @@ bpObjectToPython(const bp::Object * obj,
 
     // To avoid multiple allocations
     if (v == NULL) {
-        //(unsigned long int)Py_RETURN_NONE;
+        Py_INCREF(Py_None);
         return (unsigned long int)Py_None;
     }
     return (unsigned long int)v;

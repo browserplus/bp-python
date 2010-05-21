@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -38,11 +37,23 @@
 
 std::string python::getLastError()
 {
-    PyObject* lasterr = rb_gv_get("$!");
-    PyObject* errMessage = rb_obj_as_string(lasterr);
-    return RSTRING_PTR(errMessage);
+    std::string s;
+    PyObject* lasterr = PyErr_Occurred();
+    if (lasterr == NULL) return s;
+    PyObject* ptype = NULL;
+    PyObject* pvalue = NULL;
+    PyObject* ptraceback = NULL;
+    PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+    if (pvalue != NULL) {
+        PyObject* errstr = PyObject_Str(pvalue);
+        s = PyString_AsString(errstr);
+        Py_DECREF(errstr);
+    }
+    PyErr_Restore(ptype, pvalue, ptraceback);
+    return s;
 }
 
+#if 0
 #define MAX_ARGS 32
 
 typedef struct 
@@ -52,7 +63,9 @@ typedef struct
     int nargs;
     PyObject* args[MAX_ARGS];
 } FuncallArgs;
+#endif // 0
 
+#if 0
 static PyObject* rb_funcall_proxy(PyObject* arg)
 {
     FuncallArgs * fa = (FuncallArgs *) arg;
@@ -61,11 +74,13 @@ static PyObject* rb_funcall_proxy(PyObject* arg)
                        fa->nargs,
                        fa->args);
 }
-    
+#endif // 0
+
 PyObject*
 python::invokeFunction(PyObject* r, const char * funcName, int * error,
                      int nargs, ...)
 {
+#if 0    
     FuncallArgs fa;
     
     fa.receiver = r;
@@ -82,5 +97,8 @@ python::invokeFunction(PyObject* r, const char * funcName, int * error,
     va_end(argh);
     
     return rb_protect(rb_funcall_proxy, (PyObject*) &fa, error);
-}
+#else // 0
+    Py_INCREF(Py_None);
+    return Py_None;
 #endif // 0
+}

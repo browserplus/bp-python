@@ -195,7 +195,7 @@ static void * pythonThreadFunc(void * ctx)
                 int error = 0;
                 PyObject* tid = rb_uint_new(work->m_tid);
                 PyObject* trans = rb_class_new_instance(1, &tid,
-                                                    bp_rb_cTransaction);
+                                                    bp_py_cTransaction);
 
                 g_bpCoreFunctions->log(
                     BP_DEBUG, "executing func '%s'",

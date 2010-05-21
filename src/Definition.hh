@@ -1,4 +1,3 @@
-#if 0
 /**
  * Copyright 2010, Yahoo!
  *  
@@ -51,4 +50,3 @@ namespace python {
 };
 
 #endif
-#endif // 0
