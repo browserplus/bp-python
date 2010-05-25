@@ -299,11 +299,11 @@ void python::shutdown(void)
     Py_Finalize();
 }
 
-#if 0
 bp::service::Description *
 python::loadPythonService(const std::string & pathToPythonFile,
                       std::string & oError)
 {
+#if 0
     python::Work work(python::Work::T_LoadService);
     work.sarg.append(pathToPythonFile);
     
@@ -314,11 +314,15 @@ python::loadPythonService(const std::string & pathToPythonFile,
     }
 
     return work.m_desc; // if non-null, caller owns
+#else // 0
+    return NULL;
+#endif // 0
 }
 
 void *
 python::allocateInstance(const bp::Map * context)
 {
+#if 0
     python::Work work(python::Work::T_AllocateInstance);
     work.m_obj = context;
     
@@ -333,6 +337,9 @@ python::allocateInstance(const bp::Map * context)
     }
 
     return (void *) work.m_instance; // if non-null, caller owns
+#else // 0
+    return NULL;
+#endif // 0
 }
 
 
@@ -340,6 +347,7 @@ void
 python::invoke(void * instance, const char * funcName,
              unsigned int tid, bp::Map * arguments)
 {
+#if 0
     // set up a dynamically allocated structure with information about
     // the method invocation
     python::Work * work = new python::Work(python::Work::T_InvokeMethod);
@@ -351,14 +359,16 @@ python::invoke(void * instance, const char * funcName,
     
     // asynchronously run this work, not waiting around for the results
     runWorkASync(work);
+#endif // 0
 }
 
 
 void
 python::destroyInstance(void * instance)
 {
+#if 0
     python::Work work(python::Work::T_ReleaseInstance);
     work.m_instance = (PyObject*) instance;
     runWorkSync(&work);
-}
 #endif // 0
+}

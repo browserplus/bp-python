@@ -45,7 +45,6 @@ namespace python {
     // shutdown the python interpreter, freeing all possible resources.
     void shutdown(void);
 
-#if 0
     // given a path to a entry point python file, load the file and
     // extract a description.
     // on error, NULL is returned and a human readable error is returned
@@ -60,7 +59,6 @@ namespace python {
                 unsigned int tid, bp::Map * arguments);
 
     void destroyInstance(void * instance);
-#endif // 0
 }
 
 #endif
