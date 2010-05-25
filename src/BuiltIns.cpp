@@ -55,7 +55,9 @@ trans_tid(PyObject* obj)
 {
     return rb_ivar_get(obj, rb_intern("tid"));
 }
+#endif // 0
 
+#if 0
 static PyObject*
 trans_complete(int argc, PyObject* * argv, PyObject* obj)
 {
@@ -172,7 +174,9 @@ trans_error(int argc, PyObject* * argv, PyObject* obj)
 
     return Qnil;
 }
+#endif // 0
 
+#if 0
 static PyObject*
 callb_init(PyObject* obj, PyObject* tid, PyObject* cid)
 {
@@ -192,7 +196,9 @@ callb_cid(PyObject* obj)
 {
     return rb_ivar_get(obj, rb_intern("cid"));
 }
+#endif // 0
 
+#if 0
 static PyObject*
 callb_invoke(int argc, PyObject* * argv, PyObject* obj)
 {

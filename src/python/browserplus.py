@@ -3,34 +3,44 @@
 # http://github.com/why/fakeplus/blob/master/stdlib/bp_hacks.rb
 #
 
-$BrowserPlusEntryPointClass = nil
+BrowserPlusEntryPointClass = None
 
-class Array
-  def / len
-    a = []
-    each_with_index do |x, i|
-      a << [] if i % len == 0
-      a.last << x
+# this simulates ruby's Open Classes
+def extend(class_to_extend):
+    def decorator(extending_class):
+        class_to_extend.__dict__.update(extending_class.__dict__)
+        return class_to_extend
+    return decorator
+
+@extend(Array)
+class Array:
+    def / len
+        a = []
+            each_with_index do |x, i|
+                a << [] if i % len == 0
+                a.last << x
+            end
+        a
     end
-    a
-  end
 end
 
+@extend(Class)
 class Class
   def bp_version v
     @bp_version = v.chomp
   end
 
-  def bp_doc m, desc = nil
-    if $BrowserPlusEntryPointClass == nil
-      $BrowserPlusEntryPointClass = self
-    elsif $BrowserPlusEntryPointClass != self
+  def bp_doc m, desc = None
+    global BrowserPlusEntryPointClass
+    if BrowserPlusEntryPointClass == None
+      BrowserPlusEntryPointClass = self
+    elsif BrowserPlusEntryPointClass != self
       throw "multiple entry point classes detected!  you may only have " +
             "a single \"entry point class\" which uses bp_doc functions"
     end
       
     @bp_doc ||= {}
-    m, desc = nil, m unless desc
+    m, desc = None, m unless desc
     @bp_doc[m] = parse_bp_doc(m, desc)
   end
 
@@ -74,7 +84,7 @@ class Class
 #  end
  
   def to_service_description
-    doc, init = @bp_doc[nil]
+    doc, init = @bp_doc[None]
     hsh =
       {'class' => self.name,
        'name' => self.name,

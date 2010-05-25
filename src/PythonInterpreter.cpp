@@ -142,7 +142,7 @@ static void * pythonThreadFunc(void * ctx)
                         work->m_verboseError = python::getLastError();
                     } else {
                         // now it's time to pull out the global symbol
-                        // $BrowserPlusEntryPointClass
+                        // BrowserPlusEntryPointClass
                         // and call its to_service_description method
                         // and we'll get a python data structure we can
                         // traverse to discover the python interface

@@ -37,7 +37,7 @@
 #include "PythonHeaders.hh"
 
 #include <sstream> 
-const char * python::BP_GLOBAL_DEF_SYM = "$BrowserPlusEntryPointClass";
+const char * python::BP_GLOBAL_DEF_SYM = "BrowserPlusEntryPointClass";
 #define BP_EXTERNAL_REP_METHOD "to_service_description"
 
 #if 0
@@ -203,7 +203,7 @@ bp::service::Description *
 python::extractDefinition(std::string& verboseError)
 {
 #if 0
-    // Global variable "$BrowserPlusEntryPointClass" will reference a 
+    // Global variable "BrowserPlusEntryPointClass" will reference a 
     // class with a .to_service_description method.  This method returns
     // a stable python data structure that we can traverse to build up a
     // c++/c representation of the services interface.
