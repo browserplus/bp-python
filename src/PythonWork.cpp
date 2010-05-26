@@ -1,6 +1,6 @@
 /**
  * Copyright 2010, Yahoo!
- *  
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -14,7 +14,7 @@
  *  3. Neither the name of Yahoo! nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -37,8 +37,17 @@
 #include "PythonWork.hh"
 
 python::Work::Work(python::Work::Type t)
-    : m_type(t), m_error(false), m_desc(NULL), m_syncLock(NULL),
-      m_syncCond(NULL), m_done(false)
+: m_type(t)
+, sarg("")
+, m_error(false)
+, m_verboseError("")
+, m_desc(NULL)
+, m_obj(NULL)
+, m_instance(NULL)
+, m_tid(0)
+, m_syncLock(NULL)
+, m_syncCond(NULL)
+, m_done(false)
 {
 }
 

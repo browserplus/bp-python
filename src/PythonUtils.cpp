@@ -1,6 +1,6 @@
 /**
  * Copyright 2010, Yahoo!
- *  
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -14,7 +14,7 @@
  *  3. Neither the name of Yahoo! nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,23 +26,19 @@
  *  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
  *  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
- *
  */
 
 #include "PythonUtils.hh"
 
-#include <assert.h>
-
-#include "PythonHeaders.hh"
-
-std::string python::getLastError()
-{
+std::string python::getLastError() {
     std::string s;
     PyObject* lasterr = PyErr_Occurred();
-    if (lasterr == NULL) return s;
-    PyObject* ptype = NULL;
-    PyObject* pvalue = NULL;
-    PyObject* ptraceback = NULL;
+    if (lasterr == NULL) {
+        return s;
+    }
+    PyObject* ptype;
+    PyObject* pvalue;
+    PyObject* ptraceback;
     PyErr_Fetch(&ptype, &pvalue, &ptraceback);
     if (pvalue != NULL) {
         PyObject* errstr = PyObject_Str(pvalue);
@@ -56,49 +52,38 @@ std::string python::getLastError()
 #if 0
 #define MAX_ARGS 32
 
-typedef struct 
-{
+typedef struct {
     PyObject* receiver;
     ID function;
     int nargs;
     PyObject* args[MAX_ARGS];
 } FuncallArgs;
-#endif // 0
 
-#if 0
 static PyObject* rb_funcall_proxy(PyObject* arg)
 {
-    FuncallArgs * fa = (FuncallArgs *) arg;
-    return rb_funcall2(fa->receiver,
-                       fa->function,
-                       fa->nargs,
-                       fa->args);
+    FuncallArgs* fa = (FuncallArgs*)arg;
+    return rb_funcall2(fa->receiver, fa->function, fa->nargs, fa->args);
 }
 #endif // 0
 
 PyObject*
-python::invokeFunction(PyObject* r, const char * funcName, int * error,
-                     int nargs, ...)
+python::invokeFunction(PyObject* r, const char* funcName, int* error, int nargs, ...)
 {
-#if 0    
+#if 0
     FuncallArgs fa;
-    
     fa.receiver = r;
     fa.function = rb_intern(funcName);
     fa.nargs = nargs;
-
     *error = 0;
-
     va_list argh;
     assert(nargs < MAX_ARGS);
-    
     va_start(argh, nargs);
-    for (int i = 0; i < nargs; i++) fa.args[i] = va_arg(argh, PyObject*);
+    for (int i = 0; i < nargs; i++) {
+        fa.args[i] = va_arg(argh, PyObject*);
+    }
     va_end(argh);
-    
-    return rb_protect(rb_funcall_proxy, (PyObject*) &fa, error);
+    return rb_protect(rb_funcall_proxy, (PyObject*)&fa, error);
 #else // 0
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 #endif // 0
 }

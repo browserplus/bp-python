@@ -78,7 +78,7 @@ namespace python
         bool m_error;
         std::string m_verboseError;
         // Used during LoadService work to return a service description.
-        bp::service::Description * m_desc;
+        bp::service::Description* m_desc;
         // A means of getting data back and forth.
         const bp::Object* m_obj;
         // How the instance object is passed back and forth.

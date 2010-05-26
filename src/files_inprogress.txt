@@ -14,7 +14,7 @@ Marked files are completely ported.
 *  PythonInterpreter.hh
    PythonUtils.cpp
 *  PythonUtils.hh
-   PythonWork.cpp
+*  PythonWork.cpp
 *  PythonWork.hh
 *  ServiceGlobals.hh
    build.xml
