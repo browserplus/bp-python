@@ -49,7 +49,7 @@
 #include <stdlib.h>
 #endif // 0
 
-// a description of this corelet.
+// a description of this service.
 BPCoreletDefinition s_pythonInterpreterDef = {
     "PythonInterpreter",
     1, 0, 0,
@@ -206,7 +206,7 @@ BPPDetach(unsigned int attachID)
 #endif // 0
 
 #if 0
-/** and finally, declare the entry point to the corelet */
+/** and finally, declare the entry point to the service */
 BPPFunctionTable funcTable = {
     BPP_CORELET_API_VERSION,
     BPPInitialize,

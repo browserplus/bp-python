@@ -1,6 +1,6 @@
 /**
  * Copyright 2010, Yahoo!
- *  
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -14,7 +14,7 @@
  *  3. Neither the name of Yahoo! nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,17 +29,16 @@
  */
 
 /**
- * BuiltIns.h -- Built in classes unique to the browserplus python corelet
- *               environment 
+ * BuiltIns.hh: Built-in classes unique to the browserplus python service environment.
  */
 
 #ifndef __BUILTINS_H__
 #define __BUILTINS_H__
 
-extern unsigned long bp_py_cTransaction;
-extern unsigned long bp_py_cCallback;
+extern void* /*PyObject**/ bp_py_cTransaction;
+extern void* /*PyObject**/ bp_py_cCallback;
 
-// bind builtin classes to python evaluation context.
+// Bind built-in classes to python evaluation context.
 void bp_load_builtins();
 
-#endif
+#endif // __BUILTINS_H__

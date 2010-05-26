@@ -1,6 +1,6 @@
 /**
  * Copyright 2010, Yahoo!
- *  
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -14,7 +14,7 @@
  *  3. Neither the name of Yahoo! nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,24 +29,23 @@
  */
 
 /**
- * code to extract a service definition from the python environment
- * and to populate an in memory representation
+ * Definition.hh: Code to extract a service definition from the python environment
+ * and to populate an in memory representation.
  */
 
-#ifndef __DEFINITION_HH__
-#define __DEFINITION_HH__
+#ifndef __DEFINITION_H__
+#define __DEFINITION_H__
 
 #include "bpservicedescription.hh"
 #include <string>
 
 namespace python {
-
-    extern const char * BP_GLOBAL_DEF_SYM;
-    
-    /** crawl the current python context to translate a python corelet
-     *  definition into it's equivalent C structures */
-    bp::service::Description * extractDefinition(std::string& verboseError);
-
+    extern const char* BP_GLOBAL_DEF_SYM;
+    /**
+     * Crawl the current python context to translate a python service
+     * definition into it's equivalent C structures.
+     */
+    bp::service::Description* extractDefinition(std::string& verboseError);
 };
 
-#endif
+#endif // __DEFINITION_H__

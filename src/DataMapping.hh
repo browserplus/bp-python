@@ -1,6 +1,6 @@
 /**
  * Copyright 2010, Yahoo!
- *  
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -14,7 +14,7 @@
  *  3. Neither the name of Yahoo! nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,8 +29,7 @@
  */
 
 /**
- * DataMapping.h - tools to map data back and forth from python's PyObject* to
- *                 bp::Object 
+ * DataMapping.hh: Tools to map data back and forth from python's PyObject* to bp::Object.
  */
 
 #ifndef __DATAMAPPING_H__
@@ -38,9 +37,7 @@
 
 #include "bptypeutil.hh"
 
-bp::Object * pythonToBPObject(unsigned long int /*PyObject**/ v);
+bp::Object* pythonToBPObject(void* /*PyObject**/ v);
+void* /*PyObject**/ bpObjectToPython(const bp::Object* obj, unsigned int tid);
 
-unsigned long int /*PyObject**/ bpObjectToPython(const bp::Object * obj,
-                                           unsigned int tid);
-
-#endif
+#endif // __DATAMAPPING_H__

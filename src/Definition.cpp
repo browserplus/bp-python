@@ -1,6 +1,6 @@
 /**
  * Copyright 2010, Yahoo!
- *  
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -14,7 +14,7 @@
  *  3. Neither the name of Yahoo! nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,63 +29,65 @@
  */
 
 /**
- * code to extract a corelet definition from a python corelet
+ * Code to extract a service definition from a python service.
  */
 
 #include "Definition.hh"
 #include "PythonUtils.hh"
-#include "PythonHeaders.hh"
+#include <sstream>
 
-#include <sstream> 
-const char * python::BP_GLOBAL_DEF_SYM = "BrowserPlusEntryPointClass";
+const char* python::BP_GLOBAL_DEF_SYM = "BrowserPlusEntryPointClass";
 #define BP_EXTERNAL_REP_METHOD "to_service_description"
 
 #if 0
-bool extractString(PyObject* hash, const char * key, std::string & where)
-{
+bool
+extractString(PyObject* hash, const char* key, std::string& where) {
     where.clear();
     PyObject* rkey = rb_str_new2(key);
     PyObject* val = rb_hash_aref(hash, rkey);
-    if (rb_type(val) != T_STRING) return false;
+    if (rb_type(val) != T_STRING) {
+        return false;
+    }
     where.append(RSTRING_PTR(val));
     return true;
 }
 
-bool extractNumber(PyObject* hash, const char * key, unsigned int * where)
-{
+bool
+extractNumber(PyObject* hash, const char* key, unsigned int* where) {
     PyObject* rkey = rb_str_new2(key);
     PyObject* val = rb_hash_aref(hash, rkey);
-    if (rb_type(val) != T_FIXNUM) return false;
+    if (rb_type(val) != T_FIXNUM) {
+        return false;
+    }
     *where = NUM2UINT(val);
     return true;
 }
 
-bool extractBool(PyObject* hash, const char * key, bool * where)
-{
+bool
+extractBool(PyObject* hash, const char* key, bool* where) {
     PyObject* rkey = rb_str_new2(key);
     PyObject* val = rb_hash_aref(hash, rkey);
     if (rb_type(val) == T_TRUE) {
         *where = true;
-    } else if (rb_type(val) == T_FALSE) {
+    }
+    else if (rb_type(val) == T_FALSE) {
         *where = false;
-    } else {
+    }
+    else {
         return false;
     }
     return true;
 }
 
-bool processArgument(PyObject* hash, bp::service::Function & f,
-                     std::string & verboseError)
-{
+bool
+processArgument(PyObject* hash, bp::service::Function& f, std::string& verboseError) {
     bp::service::Argument a;
     std::string s;
-    
     if (!extractString(hash, "name", s)) {
         verboseError.append("'name' missing from argument definition\n");
         return false;
     }
     a.setName(s.c_str());
-    
     if (!extractString(hash, "documentation", s)) {
         verboseError.append("'documentation' missing from ");
         verboseError.append(a.name());
@@ -93,7 +95,6 @@ bool processArgument(PyObject* hash, bp::service::Function & f,
         return false;
     }
     a.setDocString(s.c_str());
-
     bool required = false;
     if (!extractBool(hash, "required", &required)) {
         verboseError.append("'required' specification missing from ");
@@ -102,47 +103,37 @@ bool processArgument(PyObject* hash, bp::service::Function & f,
         return false;
     }
     a.setRequired(required);
-
-    // now for the type.
+    // Now for the type.
     if (!extractString(hash, "type", s)) {
         verboseError.append("'type' missing from ");
         verboseError.append(a.name());
         verboseError.append(" argument definition");
         return false;
     }
-
-    // map string to type
+    // Map string to type.
     bp::service::Argument::Type t;
     t = bp::service::Argument::stringAsType(s.c_str());
     if (t == bp::service::Argument::None) {
         verboseError.append("invalid argument type: " + s);
         return false;
     }
-
     a.setType(t);
-
-    // XXX: need addArgument
+    // NEEDSWORK!!!  Need addArgument.
     std::list<bp::service::Argument> arguments = f.arguments();
     arguments.push_back(a);
-    f.setArguments(arguments);    
-
+    f.setArguments(arguments);
     return true;
 }
 
-
-static bool processFunction(PyObject* hash, bp::service::Description * desc,
-                            std::string & verboseError)
-{
+static bool
+processFunction(PyObject* hash, bp::service::Description* desc, std::string& verboseError) {
     bp::service::Function f;
-
     std::string s;
-    
     if (!extractString(hash, "name", s)) {
         verboseError.append("'name' missing from function definition");
         return false;
     }
     f.setName(s.c_str());
-
     if (!extractString(hash, "documentation", s)) {
         verboseError.append("'documentation' missing from ");
         verboseError.append(f.name());
@@ -150,8 +141,7 @@ static bool processFunction(PyObject* hash, bp::service::Description * desc,
         return false;
     }
     f.setDocString(s.c_str());
-
-    // now process the arguments
+    // Now process the arguments.
     {
         PyObject* rkey = rb_str_new2("arguments");
         PyObject* arr = rb_hash_aref(hash, rkey);
@@ -161,59 +151,50 @@ static bool processFunction(PyObject* hash, bp::service::Description * desc,
             verboseError.append(" function");
             return false;
         }
-
-        for (long int i = 0; true ; i++) {
+        for (long int i = 0; true; i++) {
             PyObject* rfHash = rb_ary_entry(arr, i);
-            if (rb_type(rfHash) == T_NIL) break;
-
+            if (rb_type(rfHash) == T_NIL) {
+                break;
+            }
             if (rb_type(rfHash) != T_HASH) {
-                verboseError.append(
-                    "non-hash member found in 'arguments' array for function ");
+                verboseError.append("non-hash member found in 'arguments' array for function ");
                 verboseError.append(f.name());
                 return false;
             }
-
-            // now process the function hash
+            // Now process the function hash.
             if (!processArgument(rfHash, f, verboseError)) {
                 return false;
             }
         }
     }
-
-    // XXX: need "addFunction"
+    // NEEDSWORK!!!  Need "addFunction."
     std::list<bp::service::Function> l(desc->functions());
     l.push_back(f);
     desc->setFunctions(l);
-
     return true;
 }
 
-
 static std::string
-formatError(const char * e)
-{
+formatError(const char* e) {
     std::stringstream ss;
     ss << e << ": " << python::getLastError();
     return ss.str();
 }
 #endif // 0
 
-
-bp::service::Description *
+bp::service::Description*
 python::extractDefinition(std::string& verboseError)
 {
 #if 0
-    // Global variable "BrowserPlusEntryPointClass" will reference a 
+    // Global variable "BrowserPlusEntryPointClass" will reference a
     // class with a .to_service_description method.  This method returns
     // a stable python data structure that we can traverse to build up a
     // c++/c representation of the services interface.
     PyObject* defSym = 0;
     {
         PyObject* gv = rb_gv_get(BP_GLOBAL_DEF_SYM);
-        if (rb_type(gv) != T_CLASS)
-        {
-            verboseError.append("python service lacks entry point class, "
-                                "cannot find ");
+        if (rb_type(gv) != T_CLASS) {
+            verboseError.append("python service lacks entry point class, cannot find ");
             verboseError.append(BP_GLOBAL_DEF_SYM);
             verboseError.append(", is bp_doc properly called?");
             return NULL;
@@ -224,20 +205,16 @@ python::extractDefinition(std::string& verboseError)
             verboseError = formatError("couldn't attain service description");
             return NULL;
         }
-
         if (rb_type(defSym) != T_HASH) {
             verboseError.append(BP_EXTERNAL_REP_METHOD " returns invalid type");
             return NULL;
         }
     }
 #endif // 0
-
-    // now we have a HASH ready to traverse!
-
-    bp::service::Description * desc = new bp::service::Description;
-
+    // Now we have a HASH ready to traverse!
+    bp::service::Description* desc = new bp::service::Description;
 #if 0
-    // first grab the name of the service
+    // First grab the name of the service.
     std::string s;
     if (!extractString(defSym, "name", s)) {
         verboseError.append("'name' missing from service description");
@@ -245,56 +222,49 @@ python::extractDefinition(std::string& verboseError)
         return NULL;
     }
     desc->setName(s.c_str());
-
     if (!extractString(defSym, "documentation", s)) {
         verboseError.append("'documentation' missing from service description");
-        delete desc;        
+        delete desc;
         return NULL;
     }
     desc->setDocString(s.c_str());
-
     if (!extractString(defSym, "version", s)) {
         verboseError.append("'version' missing from service description");
-        delete desc;        
+        delete desc;
         return NULL;
     }
-
-    // now parse the version
+    // Now parse the version.
     {
         bp::ServiceVersion v;
         if (!v.parse(s)) {
             verboseError.append("malformed 'version' string");
-            delete desc;        
+            delete desc;
             return NULL;
         }
         desc->setMajorVersion(v.majorVer());
-        desc->setMinorVersion(v.minorVer());        
-        desc->setMicroVersion(v.microVer());        
+        desc->setMinorVersion(v.minorVer());
+        desc->setMicroVersion(v.microVer());
     }
-    
-    // now process the functions
+    // Now process the functions.
     {
         PyObject* rkey = rb_str_new2("functions");
         PyObject* arr = rb_hash_aref(defSym, rkey);
         if (rb_type(arr) != T_ARRAY) {
-            verboseError.append("'functions' array missing from service "
-                                "description");
+            verboseError.append("'functions' array missing from service description");
             delete desc;
             return NULL;
         }
-
-        for (long int i = 0; true ; i++) {
+        for (long int i = 0; true; i++) {
             PyObject* rfHash = rb_ary_entry(arr, i);
-            if (rb_type(rfHash) == T_NIL) break;
-
+            if (rb_type(rfHash) == T_NIL) {
+                break;
+            }
             if (rb_type(rfHash) != T_HASH) {
-                verboseError.append(
-                    "non-hash member found in 'functions' array\n");
+                verboseError.append("non-hash member found in 'functions' array\n");
                 delete desc;
                 return NULL;
             }
-
-            // now process the function hash
+            // Now process the function hash.
             if (!processFunction(rfHash, desc, verboseError)) {
                 delete desc;
                 return NULL;
@@ -302,6 +272,5 @@ python::extractDefinition(std::string& verboseError)
         }
     }
 #endif // 0
-
     return desc;
 }
