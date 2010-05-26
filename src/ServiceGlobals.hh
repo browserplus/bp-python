@@ -1,6 +1,6 @@
 /**
  * Copyright 2010, Yahoo!
- *  
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -14,7 +14,7 @@
  *  3. Neither the name of Yahoo! nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,17 +28,21 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __CORELETGLOBALS_H__
-#define __CORELETGLOBALS_H__
+/**
+ * ServiceGlobals.hh: Service global data.
+ */
 
-// header files from the BrowserPlus SDK
+#ifndef __SERVICEGLOBALS_H__
+#define __SERVICEGLOBALS_H__
+
+// Header files from the BrowserPlus SDK.
 #include <ServiceAPI/bperror.h>
 #include <ServiceAPI/bptypes.h>
 #include <ServiceAPI/bpdefinition.h>
 #include <ServiceAPI/bpcfunctions.h>
 #include <ServiceAPI/bppfunctions.h>
 
-// pointer to table of functions which will call back into browserplus
-extern const BPCFunctionTable * g_bpCoreFunctions;
+// Pointer to table of functions which will call back into browserplus.
+extern const BPCFunctionTable* g_bpCoreFunctions;
 
-#endif
+#endif // __SERVICEGLOBALS_H__

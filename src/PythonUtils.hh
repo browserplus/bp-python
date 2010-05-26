@@ -26,42 +26,44 @@
  *  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
  *  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
- *
  */
 
-#ifndef __PYTHONUTILS_HH__
-#define __PYTHONUTILS_HH__
+/**
+ * PythonUtils.hh: Wrappers for including python.
+ */
+
+#ifndef __PYTHONUTILS_H__
+#define __PYTHONUTILS_H__
 
 #include "PythonHeaders.hh"
 #include <string>
 #include <map>
 
 namespace python {
-    /** get the last error encountered from the python evaluation environment */
+    /**
+     * Get the last error encountered from the python evaluation environment.
+     */
     std::string getLastError();
-
-    /** simplified invocation of a function upon a reciever while catching
-     *  errors */
-    PyObject* invokeFunction(PyObject* r, const char * funcName, int * error,
-                         int nargs, ...);
-
-    // This little class is taken from
-    // http://metaeditor.sourceforge.net/embed/
+    /**
+     * Simplified invocation of a function upon a reciever while catching
+     * errors.
+     */
+    PyObject* invokeFunction(PyObject* r, const char* funcName, int* error, int nargs, ...);
+    // This little class is taken from http://metaeditor.sourceforge.net/embed/
     // The idea is simple, we need anonymous values returned from
-    // python to have a non zero reference count so that they are not
-    // garbage collected.  One option is to interact with the rb_gc_* code
-    // directly.  This option is better, cause it's faster and simpler.
+    // python to have a non-zero reference count so that they are not
+    // deleted.
     // We allocate an array on the stack, and add elements to this array,
-    // because the array is marked, those items will not be garbage collected
+    // because the array is marked, those items will not be deleted
     // as long as they're in the array.
     class GCArray {
     public:
         GCArray() {
         }
         ~GCArray() {
-            // dispose array and flush all elements
+            // Dispose array and flush all elements.
             while (!objects.empty()) {
-                std::map<PyObject*,PyObject*>::iterator i = objects.begin();
+                std::map<PyObject*, PyObject*>::iterator i = objects.begin();
                 Py_DECREF(i->second);
                 objects.erase(i);
             }
@@ -71,7 +73,7 @@ namespace python {
             Py_INCREF(object);
         }
         void Unregister(PyObject* object) {
-            for (std::map<PyObject*,PyObject*>::iterator i = objects.begin(); i != objects.end(); i++) {
+            for (std::map<PyObject*, PyObject*>::iterator i = objects.begin(); i != objects.end(); i++) {
                 if (i->first == object) {
                     Py_DECREF(i->second);
                     objects.erase(i);
@@ -80,9 +82,8 @@ namespace python {
             }
         }
     private:
-        std::map<PyObject*,PyObject*> objects;
+        std::map<PyObject*, PyObject*> objects;
     };
-
 };
 
-#endif
+#endif // __PYTHONUTILS_H__

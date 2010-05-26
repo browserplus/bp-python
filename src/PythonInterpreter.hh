@@ -1,6 +1,6 @@
 /**
  * Copyright 2010, Yahoo!
- *  
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -14,7 +14,7 @@
  *  3. Neither the name of Yahoo! nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,37 +28,31 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PYTHONINTERPRETER_HH__
-#define __PYTHONINTERPRETER_HH__
+/**
+ * PythonInterpreter.hh: Wrappers for including python.
+ */
+
+#ifndef __PYTHONINTERPRETER_H__
+#define __PYTHONINTERPRETER_H__
 
 #include "ServiceAPI/bptypes.h"
 #include "bpservicedescription.hh"
-
 #include <string>
 
 namespace python {
-    // intialize the python interpreter, given the path to this service.
-    // this will call all required initialization routines and
+    // Intialize the python interpreter, given the path to this service.
+    // This will call all required initialization routines and
     // will correctly populate load paths.
-    void initialize(const std::string & pathToPythonServiceDataDir);
-
-    // shutdown the python interpreter, freeing all possible resources.
-    void shutdown(void);
-
-    // given a path to a entry point python file, load the file and
-    // extract a description.
-    // on error, NULL is returned and a human readable error is returned
-    // in the oError output param
-    bp::service::Description *
-        loadPythonService(const std::string & pathToPythonFile,
-                        std::string & oError);
-    
-    void * allocateInstance(const bp::Map * context);
-
-    void invoke(void * instance, const char * funcName,
-                unsigned int tid, bp::Map * arguments);
-
-    void destroyInstance(void * instance);
+    void initialize(const std::string& pathToPythonServiceDataDir);
+    // Shutdown the python interpreter, freeing all possible resources.
+    void shutdown();
+    // Given a path to a entry point python file, load the file and
+    // extract a description.  On error, NULL is returned and a human
+    // readable error is returned in the oError output param.
+    bp::service::Description* loadPythonService(const std::string& pathToPythonFile, std::string& oError);
+    void* allocateInstance(const bp::Map* context);
+    void invoke(void* instance, const char* funcName, unsigned int tid, bp::Map* arguments);
+    void destroyInstance(void* instance);
 }
 
-#endif
+#endif // PYTHONINTERPRETER_H__

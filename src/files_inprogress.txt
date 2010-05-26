@@ -11,16 +11,16 @@ Marked files are completely ported.
 *  LICENSE.txt
 *  PythonHeaders.hh
    PythonInterpreter.cpp
-   PythonInterpreter.hh
+*  PythonInterpreter.hh
    PythonUtils.cpp
-   PythonUtils.hh
+*  PythonUtils.hh
    PythonWork.cpp
-   PythonWork.hh
-   ServiceGlobals.hh
+*  PythonWork.hh
+*  ServiceGlobals.hh
    build.xml
    ext_fixup.sh
    libpython_fixup.sh
-   manifest.json
+*  manifest.json
    python/browserplus.py
    service.cpp
 *  util
