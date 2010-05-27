@@ -1,6 +1,6 @@
 /**
  * Copyright 2010, Yahoo!
- *  
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -14,7 +14,7 @@
  *  3. Neither the name of Yahoo! nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,7 +26,6 @@
  *  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
  *  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
- *
  */
 
 #include "ServiceGlobals.hh"
@@ -36,7 +35,7 @@
 // boundary
 #include "bptypeutil.hh"
 
-// an abstraction around python 
+// an abstraction around python
 #include "PythonInterpreter.hh"
 #include "PythonHeaders.hh"
 
@@ -65,7 +64,7 @@ BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
               const BPElement * parameterMap)
 {
     // the name of the python script and path can be extracted from the
-    // parameter map 
+    // parameter map
     bp::Object * obj = bp::Object::build(parameterMap);
 
     // first get the path
@@ -81,7 +80,7 @@ BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
     delete obj;
 
     // this will go in the BrowserPlusCore log file at info level.  nice.
-    
+
     g_bpCoreFunctions->log(
         BP_INFO,
         "initializing python interpreter with service path: %s",
@@ -154,7 +153,7 @@ BPPAttach(unsigned int attachID, const BPElement * paramMap)
     if (def != NULL) return def;
 
     // the name of the python script and path can be extracted from the
-    // parameter map 
+    // parameter map
     bp::Object * obj = bp::Object::build(paramMap);
 
     // first get the path
@@ -172,14 +171,14 @@ BPPAttach(unsigned int attachID, const BPElement * paramMap)
     }
 
     bp::Map * params = (bp::Map *) obj->get("Parameters");
-    
+
     if (!params->has("ScriptFile", BPTString)) {
         delete obj;
         return NULL;
     }
 
     path.append(PATHSEP);
-    path.append(((bp::Path *) params->get("ScriptFile"))->value());    
+    path.append(((bp::Path *) params->get("ScriptFile"))->value());
 
     std::string error;
     s_desc = python::loadPythonService(path, error);

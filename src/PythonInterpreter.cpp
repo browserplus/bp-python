@@ -1,6 +1,6 @@
 /**
  * Copyright 2010, Yahoo!
- *  
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -14,7 +14,7 @@
  *  3. Neither the name of Yahoo! nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -70,10 +70,10 @@ static void * pythonThreadFunc(void * ctx)
     PySys_SetArgv(s_argc, s_argv);
 #if 0
     python_init();
-    int error = 0; 
+    int error = 0;
     python_script("BrowserPlus Embedded Python");
     std::string pyPath = path + "/stdlib";
-    std::string soPath = path + "/ext";        
+    std::string soPath = path + "/ext";
     python_incpush(pyPath.c_str());
     python_incpush(soPath.c_str());
 
@@ -101,16 +101,16 @@ static void * pythonThreadFunc(void * ctx)
         // pop an item off the queue and process it,
         // outside of the global data structure lock
         python::Work * work = NULL;
-        
+
         {
             s_pythonLock.lock();
             if (s_workQueue.size() > 0) {
                 work = *(s_workQueue.begin());
                 s_workQueue.erase(s_workQueue.begin());
-            } 
+            }
             s_pythonLock.unlock();
         }
-            
+
         if (work == NULL) {
             PyObject* sleepyTime = rb_float_new(0.05);
             // run the interpreter for a little bit to let background
@@ -128,7 +128,7 @@ static void * pythonThreadFunc(void * ctx)
 
                 // read python source file
                 std::string source = file::readFile(work->sarg);
-                
+
                 if (source.empty()) {
                     work->m_error = true;
                     work->m_verboseError.append("couldn't read: '" +
@@ -136,7 +136,7 @@ static void * pythonThreadFunc(void * ctx)
                 } else {
                     int error = 0;
                     (void) rb_eval_string_protect(source.c_str(), &error);
-                    
+
                     if (error) {
                         work->m_error = true;
                         work->m_verboseError = python::getLastError();
@@ -165,7 +165,7 @@ static void * pythonThreadFunc(void * ctx)
                 ID initialize = rb_intern("initialize");
                 if (rb_method_boundp(klass, initialize, 0))
                 {
-                    PyObject* initMeth = 
+                    PyObject* initMeth =
                         python::invokeFunction(
                             klass, "instance_method", &error,
                             1, ID2SYM(initialize));
@@ -178,7 +178,7 @@ static void * pythonThreadFunc(void * ctx)
                         }
                     }
                 }
-                
+
                 work->m_instance =
                     python::invokeFunction(klass, "new", &error, takesArg,
                                          initArgs);
@@ -223,7 +223,7 @@ static void * pythonThreadFunc(void * ctx)
                     (void) python::invokeFunction(work->m_instance,
                                                 "destroy", &error, 0);
                 }
-                
+
                 gcArray.Unregister(work->m_instance);
             }
 
@@ -282,7 +282,7 @@ void python::initialize(const std::string & path)
         if (s_pythonThread.run(pythonThreadFunc, (void *) path.c_str())) {
             while (!s_running) s_pythonCond.wait(&s_pythonLock);
         }
-        s_pythonLock.unlock();        
+        s_pythonLock.unlock();
     }
 }
 
@@ -292,7 +292,7 @@ void python::shutdown(void)
     if (s_running) {
         s_pythonLock.lock();
         s_running = false;
-        s_pythonCond.signal();        
+        s_pythonCond.signal();
         s_pythonLock.unlock();
         s_pythonThread.join();
     }
@@ -306,7 +306,7 @@ python::loadPythonService(const std::string & pathToPythonFile,
 #if 0
     python::Work work(python::Work::T_LoadService);
     work.sarg.append(pathToPythonFile);
-    
+
     runWorkSync(&work);
 
     if (work.m_error) {
@@ -325,7 +325,7 @@ python::allocateInstance(const bp::Map * context)
 #if 0
     python::Work work(python::Work::T_AllocateInstance);
     work.m_obj = context;
-    
+
     runWorkSync(&work);
 
     if (work.m_error) {
@@ -356,7 +356,7 @@ python::invoke(void * instance, const char * funcName,
     work->m_tid = tid;
     if (arguments) { work->m_obj = arguments->clone(); }
     else work->m_obj = NULL;
-    
+
     // asynchronously run this work, not waiting around for the results
     runWorkASync(work);
 #endif // 0

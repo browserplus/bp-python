@@ -39,44 +39,56 @@
 const char* python::BP_GLOBAL_DEF_SYM = "BrowserPlusEntryPointClass";
 #define BP_EXTERNAL_REP_METHOD "to_service_description"
 
-#if 0
 bool
 extractString(PyObject* hash, const char* key, std::string& where) {
+    bool result = false;
     where.clear();
-    PyObject* rkey = rb_str_new2(key);
-    PyObject* val = rb_hash_aref(hash, rkey);
-    if (rb_type(val) != T_STRING) {
-        return false;
+    PyObject* rkey = PyString_FromString(key);
+    PyObject* val = PyDict_GetItem(hash, rkey);
+    Py_DECREF(rkey);
+    if (PyString_Check(val)) {
+        where.append(PyString_AsString(val));
+        result = true;
     }
-    where.append(RSTRING_PTR(val));
-    return true;
+    return result;
 }
 
 bool
 extractNumber(PyObject* hash, const char* key, unsigned int* where) {
-    PyObject* rkey = rb_str_new2(key);
-    PyObject* val = rb_hash_aref(hash, rkey);
-    if (rb_type(val) != T_FIXNUM) {
-        return false;
+    bool result = false;
+    *where = 0;
+    PyObject* rkey = PyString_FromString(key);
+    PyObject* val = PyDict_GetItem(hash, rkey);
+    Py_DECREF(rkey);
+    if (PyInt_Check(val)) {
+        *where = PyInt_AS_LONG(val);
+        result = true;
     }
-    *where = NUM2UINT(val);
-    return true;
+    else if (PyLong_Check(val)) {
+        *where = PyLong_AsLong(val);
+        result = true;
+    }
+    return result;
 }
 
 bool
 extractBool(PyObject* hash, const char* key, bool* where) {
-    PyObject* rkey = rb_str_new2(key);
-    PyObject* val = rb_hash_aref(hash, rkey);
-    if (rb_type(val) == T_TRUE) {
-        *where = true;
+    bool result = false;
+    *where = false;
+    PyObject* rkey = PyString_FromString(key);
+    PyObject* val = PyDict_GetItem(hash, rkey);
+    Py_DECREF(rkey);
+    if (PyBool_Check(val)) {
+        if (val == Py_True) {
+            *where = true;
+            result = true;
+        }
+        else if (val == Py_False) {
+            *where = false;
+            result = true;
+        }
     }
-    else if (rb_type(val) == T_FALSE) {
-        *where = false;
-    }
-    else {
-        return false;
-    }
-    return true;
+    return result;
 }
 
 bool
@@ -143,20 +155,21 @@ processFunction(PyObject* hash, bp::service::Description* desc, std::string& ver
     f.setDocString(s.c_str());
     // Now process the arguments.
     {
-        PyObject* rkey = rb_str_new2("arguments");
-        PyObject* arr = rb_hash_aref(hash, rkey);
-        if (rb_type(arr) != T_ARRAY) {
+        PyObject* rkey = PyString_FromString("arguments");
+        PyObject* arr = PyDict_GetItem(hash, rkey);
+        Py_DECREF(rkey);
+        if (!PyList_Check(arr)) {
             verboseError.append("'arguments' array missing from definition of");
             verboseError.append(f.name());
             verboseError.append(" function");
             return false;
         }
         for (long int i = 0; true; i++) {
-            PyObject* rfHash = rb_ary_entry(arr, i);
-            if (rb_type(rfHash) == T_NIL) {
+            PyObject* rfHash = PyList_GetItem(arr, i);
+            if (rfHash == Py_None) {
                 break;
             }
-            if (rb_type(rfHash) != T_HASH) {
+            if (!PyDict_Check(rfHash)) {
                 verboseError.append("non-hash member found in 'arguments' array for function ");
                 verboseError.append(f.name());
                 return false;
@@ -180,7 +193,6 @@ formatError(const char* e) {
     ss << e << ": " << python::getLastError();
     return ss.str();
 }
-#endif // 0
 
 bp::service::Description*
 python::extractDefinition(std::string& verboseError)
