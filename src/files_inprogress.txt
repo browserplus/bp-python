@@ -1,6 +1,6 @@
 Marked files are completely ported.
 
-   BuildConfigs.cmake
+*  BuildConfigs.cmake
 *  BuiltIns.cpp
 *  BuiltIns.hh
    CMakeLists.txt
@@ -17,7 +17,7 @@ Marked files are completely ported.
 *  PythonWork.cpp
 *  PythonWork.hh
 *  ServiceGlobals.hh
-   build.xml
+*  build.xml
    ext_fixup.sh
    libpython_fixup.sh
 *  manifest.json
