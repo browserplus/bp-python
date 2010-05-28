@@ -6,7 +6,7 @@ Marked files are completely ported.
    CMakeLists.txt
 *  DataMapping.cpp
 *  DataMapping.hh
-   Definition.cpp
+*  Definition.cpp
 *  Definition.hh
 *  LICENSE.txt
 *  PythonHeaders.hh

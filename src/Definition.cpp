@@ -197,52 +197,60 @@ formatError(const char* e) {
 bp::service::Description*
 python::extractDefinition(std::string& verboseError)
 {
-#if 0
     // Global variable "BrowserPlusEntryPointClass" will reference a
     // class with a .to_service_description method.  This method returns
     // a stable python data structure that we can traverse to build up a
     // c++/c representation of the services interface.
     PyObject* defSym = 0;
     {
-        PyObject* gv = rb_gv_get(BP_GLOBAL_DEF_SYM);
-        if (rb_type(gv) != T_CLASS) {
+        PyObject *m = PyImport_AddModule("__main__");
+        PyObject *gv = PyObject_GetAttrString(m, BP_GLOBAL_DEF_SYM);
+        // NEEDSWORK!!!  Is this correct?
+        if (!PyClass_Check(gv)) {
             verboseError.append("python service lacks entry point class, cannot find ");
             verboseError.append(BP_GLOBAL_DEF_SYM);
             verboseError.append(", is bp_doc properly called?");
+            Py_DECREF(gv);
             return NULL;
         }
         int error = 0;
         defSym = python::invokeFunction(gv, BP_EXTERNAL_REP_METHOD, &error, 0);
         if (error) {
             verboseError = formatError("couldn't attain service description");
+            Py_XDECREF(defSym);
+            Py_DECREF(gv);
             return NULL;
         }
-        if (rb_type(defSym) != T_HASH) {
+        if (!PyDict_Check(defSym)) {
             verboseError.append(BP_EXTERNAL_REP_METHOD " returns invalid type");
+            Py_DECREF(defSym);
+            Py_DECREF(gv);
             return NULL;
         }
+        Py_DECREF(gv);
     }
-#endif // 0
     // Now we have a HASH ready to traverse!
     bp::service::Description* desc = new bp::service::Description;
-#if 0
     // First grab the name of the service.
     std::string s;
     if (!extractString(defSym, "name", s)) {
         verboseError.append("'name' missing from service description");
         delete desc;
+        Py_DECREF(defSym);
         return NULL;
     }
     desc->setName(s.c_str());
     if (!extractString(defSym, "documentation", s)) {
         verboseError.append("'documentation' missing from service description");
         delete desc;
+        Py_DECREF(defSym);
         return NULL;
     }
     desc->setDocString(s.c_str());
     if (!extractString(defSym, "version", s)) {
         verboseError.append("'version' missing from service description");
         delete desc;
+        Py_DECREF(defSym);
         return NULL;
     }
     // Now parse the version.
@@ -251,6 +259,7 @@ python::extractDefinition(std::string& verboseError)
         if (!v.parse(s)) {
             verboseError.append("malformed 'version' string");
             delete desc;
+            Py_DECREF(defSym);
             return NULL;
         }
         desc->setMajorVersion(v.majorVer());
@@ -259,30 +268,34 @@ python::extractDefinition(std::string& verboseError)
     }
     // Now process the functions.
     {
-        PyObject* rkey = rb_str_new2("functions");
-        PyObject* arr = rb_hash_aref(defSym, rkey);
-        if (rb_type(arr) != T_ARRAY) {
+        PyObject* rkey = PyString_FromString("functions");
+        PyObject* arr = PyDict_GetItem(defSym, rkey);
+        Py_DECREF(rkey);
+        if (!PyList_Check(arr)) {
             verboseError.append("'functions' array missing from service description");
             delete desc;
+            Py_DECREF(defSym);
             return NULL;
         }
         for (long int i = 0; true; i++) {
-            PyObject* rfHash = rb_ary_entry(arr, i);
-            if (rb_type(rfHash) == T_NIL) {
+            PyObject* rfHash = PyList_GetItem(arr, i);
+            if (rfHash == Py_None) {
                 break;
             }
-            if (rb_type(rfHash) != T_HASH) {
+            if (!PyDict_Check(rfHash)) {
                 verboseError.append("non-hash member found in 'functions' array\n");
                 delete desc;
+                Py_DECREF(defSym);
                 return NULL;
             }
             // Now process the function hash.
             if (!processFunction(rfHash, desc, verboseError)) {
                 delete desc;
+                Py_DECREF(defSym);
                 return NULL;
             }
         }
     }
-#endif // 0
+    Py_DECREF(defSym);
     return desc;
 }
