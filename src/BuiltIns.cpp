@@ -366,4 +366,6 @@ bp_load_builtins() {
     Py_INCREF(&CallbackType);
     PyModule_AddObject(m, "Transaction", (PyObject*)&TransactionType);
     PyModule_AddObject(m, "Callback", (PyObject*)&CallbackType);
+    bp_py_cTransaction = (PyObject*)&TransactionType;;
+    bp_py_cCallback = (PyObject*)&CallbackType;
 }

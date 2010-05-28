@@ -60,6 +60,9 @@ pythonToBPObject(void* v) {
     }
     else if (PyString_Check(pv)) {
         obj = new bp::String(PyString_AS_STRING(pv));
+        // NEEDSWORK!!!  There is no pathname class in python.
+        // And no way to tell if a string is a path unless the file/dir/link exists.
+        // What should we do here?  We can't ever convert back to a BPPath?
     }
     else if (PyDict_Check(pv)) {
         bp::Map* m = new bp::Map;
@@ -80,31 +83,9 @@ pythonToBPObject(void* v) {
         obj = l;
     }
     else {
+        // Fallback.
         obj = new bp::Null();
     }
-#if 0
-    switch (TYPE(pv)) {
-        case T_OBJECT: {
-            // Map Pathname objects into BPTPath types.
-            PyObject* id = rb_intern("Pathname");
-            PyObject* klass = 0;
-            if (rb_const_defined(rb_cObject, id) && (klass = rb_const_get(rb_cObject, id)) && TYPE(klass) == T_CLASS) {
-                PyObject* r = rb_obj_is_kind_of(pv, klass);
-                if (RTEST(r)) {
-                    // Convert to abs path.
-                    int error = 0;
-                    PyObject* absPath = python::invokeFunction(pv, "realpath", &error, 0);
-                    PyObject* pathString = python::invokeFunction(absPath, "to_s", &error, 0);
-                    if (!error && TYPE(pathString) == T_STRING) {
-                        std::string uri = bp::urlutil::urlFromPath(RSTRING_PTR(pathString));
-                        obj = new bp::Path(uri);
-                    }
-                    break;
-                }
-            }
-        }
-    }
-#endif // 0
     return obj;
 }
 
@@ -159,28 +140,23 @@ bpObjectToPython(const bp::Object* obj, unsigned int tid) {
             }
             break;
         }
-#if 0
         case BPTPath: {
-            PyObject* id = rb_intern("Pathname");
-            PyObject* klass = 0;
-            if (rb_const_defined(rb_cObject, id) && (klass = rb_const_get(rb_cObject, id)) && TYPE(klass) == T_CLASS) {
-                std::string url = ((bp::Path*) obj)->value();
-                std::string path = bp::urlutil::pathFromURL(url);
-                PyObject* p = rb_str_new2(path.c_str());
-                v = rb_class_new_instance(1, &p, klass);
-            }
+            // NEEDSWORK!!!  There is no path class in Python.
+            // All we can do is represent this as a string.
+            // This is a lossy translation.  Are there alternatives?
+            std::string url = ((bp::Path*)obj)->value();
+            std::string path = bp::urlutil::pathFromURL(url);
+            v = PyString_FromString(path.c_str());
             break;
         }
-#endif // 0
-#if 0
         case BPTCallBack: {
-            PyObject* args[2];
-            args[0] = rb_uint2inum(tid);
-            args[1] = rb_ull2inum(((bp::Integer*)obj)->value());
-            v = rb_class_new_instance(2, args, bp_py_cCallback);
+            PyObject* args = Py_BuildValue("ll", tid, ((bp::Integer*)obj)->value());
+            PyObject* kwds = Py_BuildValue("");
+            v = PyType_GenericNew((PyTypeObject*)bp_py_cCallback, args, kwds);
+            Py_DECREF(kwds);
+            Py_DECREF(args);
             break;
         }
-#endif // 0
         case BPTAny:
             // Invalid.
             break;
