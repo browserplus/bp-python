@@ -14,25 +14,31 @@ def extend(class_to_extend):
 
 @extend(list)
 class list:
-    def __div__(a,len):
-        newa = []
+    def __div__(a, len):
+        newl = []
         for x, i in enumerate(self):
             if (i % len == 0):
                 new_list = []
-                newa.append(new_list)
-            sub_list = newa[i / len]
+                newl.append(new_list)
+            sub_list = newl[i / len]
             sub_list.append(x)
-            newa[i / len] = sub_list
+            newl[i / len] = sub_list
         end
-        return newa
+        return newl
+
+@extend(string)
+class string:
+    def chomp2():
+        news = self
+        news = news.rstrip('\r\n')
+        news = news.rstrip('\n')
+        news = news.rstrip('\r')
+        return news
 
 @extend(Class)
-class Class
+class Class:
     def bp_version(v):
-        v = v.rstrip('\r\n')
-        v = v.rstrip('\n')
-        v = v.rstrip('\r')
-        self.bp_version = v
+        self.bp_version = v.chomp2()
 
     def bp_doc(m, desc):
         global BrowserPlusEntryPointClass
@@ -40,56 +46,43 @@ class Class
             BrowserPlusEntryPointClass = self
         elif (BrowserPlusEntryPointClass != self):
             raise RuntimeError("multiple entry point classes detected!  you may only have a single \"entry point class\" which uses bp_doc functions")
-### Incomplete port from here out ###
-        self.bp_doc ||= {}
-        m, desc = None, m unless desc
-        self.bp_doc[m] = parse_bp_doc(m, desc)
+        if (self.bp_doc == None):
+            self.bp_doc = {}
+        if (desc == None):
+            desc = m
+        self.bp_doc[None] = parse_bp_doc(m, desc)
 
     def parse_bp_doc(mname, desc):
-        mname ||= :initialize
-        ar = instance_method(mname).arity rescue -1
+        ar = re.split(desc, '/^\s+([\[<])(\w+:\s*\w+)[\]>]\s+/')
+        doc = ar[0]
+        m = list(ar[1:])
+        m = m / 3
+        newlist = []
+        for x, i in enumerate(m):
+            bracket = x[0]
+            arg = x[1]
+            adoc = x[2]
+            ar2 = re.split(arg, '/:\s*/')
+            aname = ''
+            atype = ''
+            if (len(ar2) > 2):
+                aname = ar2[0]
+                atype = ar2[1]
+            elif (len(ar2) > 1):
+                aname = ar2[0]
+            newlist[i] = {'name': aname, 'type': atype, 'documentation': adoc.chomp2(), 'required': (bracket == "<")}
+        return [doc.strip(), newlist]
 
-        doc, *m = desc.split(/^\s+([\[<])(\w+:\s*\w+)[\]>]\s+/)
-
-        m = (m/3).map do |bracket, arg, adoc|
-            aname, atype = arg.split(/:\s*/, 2)
-            {'name' => aname, 'type' => atype, 'documentation' => adoc.chomp,
-             'required' => bracket == "<"}
-        end.compact
-        [doc.strip, m]
-
-# (lloyd) Not implementing wrapping quite yet, as it breaks async function
-# returns
-#
-#    def bp_wrap(meth, margs):
-#        alias_method "bp_#{meth}", meth
-#        case meth when 'initialize'
-#            define_method meth do |bp_args|
-#                args = []
-#                send("bp_#{meth}", *args)
-#        else
-#            define_method meth do |bp, bp_args|
-#            begin
-#                args = []
-#                if (margs):
-#                    args = margs.map { |a| bp_args[a['name']] }
-#                bp.complete(send("bp_#{meth}", *args))
-#            rescue Exception => e
-#                bp.error('FAIL', "Error: #{e}")
- 
-    def to_service_description:
-        doc, init = @bp_doc[None]
-        hsh =
-            {'class' => self.name,
-             'name' => self.name,
-             'version' => @bp_version,
-             'documentation' => doc,
-             'functions' => []}
-        @bp_doc.each do |k, (v, m)|
-            next unless k
-            hsh['functions'] << {
-                'name' => k.to_s,
-                'documentation' => v,
-                'arguments' => m
-            }
-        hsh
+    def to_service_description():
+        l = self.bp_doc[None]
+        doc = l[0]
+        init = l[1]
+        hsh = {'class': self.name, 'name': self.name, 'version': self.bp_version, 'documentation': doc, 'functions': []}
+        keys = self.bp_doc.keys()
+        keys = keys.sort()
+        flist = []
+        for x, i in enumerate(keys):
+            bpd = self.bp_doc[x]
+            flist.append({'name': x, 'documentation': bpd[0], 'arguments': bpd[1]})
+        hsh['functions'] = flist
+        return hsh

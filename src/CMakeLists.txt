@@ -1,6 +1,6 @@
 #####
 # A CMake build file for the PythonInterpreter service
-# 
+#
 # Author: Gary MacDonald
 # (c) Yahoo 2010, all rights reserved
 #####
@@ -34,7 +34,7 @@ IF (APPLE)
                    ERROR_QUIET
                    OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-   string(TOLOWER ${sysUpper} sys) 
+   string(TOLOWER ${sysUpper} sys)
 
    SET( platIdent "${arch}-${sys}${ver}" )
 
@@ -120,10 +120,10 @@ ENDIF (APPLE)
 
 
 SET(stdlibDest "${outputDir}/stdlib")
-SET(stdlibSource "${extLibDir}/python2.6")
+SET(stdlibSource "${extLibDir}/python/python/2.6.5")
 
 SET(extDest "${outputDir}/ext")
-FILE(GLOB extSource "${extLibDir}/python/2.6.5/i386-*")
+SET(extSource "${extLibDir}/python2.6")
 
 IF (APPLE)
     SET(RM_CMD rm -rf)
@@ -138,15 +138,13 @@ GET_TARGET_PROPERTY(loc ${serviceName} LOCATION)
 
 # handle the .lib .dll dichotomy
 SET (pythonLibToShip ${pythonDylib})
-IF (WIN32) 
+IF (WIN32)
   STRING(REGEX REPLACE "lib$" "dll" pythonLibToShipA ${pythonDylib})
   STRING(REGEX REPLACE "/lib/" "/bin/" pythonLibToShip ${pythonLibToShipA})
-ENDIF () 
+ENDIF ()
 
 MESSAGE("python library to link:  ${pythonDylib}" )
 MESSAGE("library to ship:       ${pythonLibToShip}")
-MESSAGE("python library to link:  ${pythonDylibA}" )
-MESSAGE("library to ship:       ${pythonLibToShipA}")
 
 ADD_CUSTOM_COMMAND(
     TARGET ${serviceName} POST_BUILD
@@ -157,7 +155,7 @@ ADD_CUSTOM_COMMAND(
                         \"${stdlibSource}\" \"${stdlibDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             \"${CMAKE_CURRENT_SOURCE_DIR}/python/browserplus.py\"
-			\"${stdlibDest}\"
+            \"${stdlibDest}\"
     COMMAND ${RM_CMD} \"${extDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
                         \"${extSource}\" \"${extDest}\"
@@ -169,27 +167,27 @@ ADD_CUSTOM_COMMAND(
             \"${outputDir}\"
 )
 
-#IF (APPLE)  
-#  # repeat after me:  I love dylibs
-#  # this post-build step will help the service find our embedded dynamic python
-#  # dylib, and will help THAT guy find stdlib extensions (.bundles in ext/)
-#  SET(libpythonBefore "libpython.dylib")
-#  SET(libpythonAfter "libpython_bp.dylib")
-#
-#  ADD_CUSTOM_COMMAND(
-#      TARGET ${serviceName} POST_BUILD
-#      COMMAND ${CMAKE_COMMAND} -E copy \"${outputDir}/${libpythonBefore}\" \"${outputDir}/${libpythonAfter}\"   
-#      COMMAND ${CMAKE_COMMAND} -E remove \"${outputDir}/${libpythonBefore}\"
-#      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup.sh ${loc}
-#      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup.sh ${loc}
-#      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/ext_fixup.sh \"${extDest}\"
-#      )
-#ENDIF ()
+IF (APPLE) 
+  # repeat after me:  I love dylibs
+  # this post-build step will help the service find our embedded dynamic python
+  # dylib, and will help THAT guy find stdlib extensions (.bundles in ext/)
+  SET(libpythonBefore "libpython2.6.dylib")
+  SET(libpythonAfter "libpython2.6_bp.dylib")
+
+  ADD_CUSTOM_COMMAND(
+      TARGET ${serviceName} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy \"${outputDir}/${libpythonBefore}\" \"${outputDir}/${libpythonAfter}\"  
+      COMMAND ${CMAKE_COMMAND} -E remove \"${outputDir}/${libpythonBefore}\"
+      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup.sh ${loc}
+      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup.sh ${loc}
+      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/ext_fixup.sh \"${extDest}\"
+      )
+ENDIF ()
 
 # copy in manifest
 GET_FILENAME_COMPONENT(ServiceLibrary "${loc}" NAME)
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/manifest.json"
-               "${outputDir}/manifest.json")  
+               "${outputDir}/manifest.json") 
 ADD_CUSTOM_COMMAND(TARGET ${serviceName} POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
                            \"${loc}\" \"${outputDir}\")
