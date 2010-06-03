@@ -30,6 +30,7 @@
  */
 
 #include "PythonHeaders.hh"
+#include "util/bpenv.hh"
 #include "util/bpthread.hh"
 #include "util/bpsync.hh"
 #include "util/fileutils.hh"
@@ -52,10 +53,22 @@ static bp::sync::Condition s_pythonCond;
 static bool s_running = false;
 static std::list<python::Work *> s_workQueue;
 
+#ifdef WIN32
+#define PATHDELIM ";"
+#else
+#define PATHDELIM ":"
+#endif
+#define PYTHONPATH "PYTHONPATH"
+
 static void*
 pythonThreadFunc(void* ctx) {
-    std::string path((const char *) ctx);
-    s_argv = (char **) calloc(2, sizeof(char *));
+    std::string path((const char*)ctx);
+    std::string pyPath = path + "/stdlib";
+    std::string soPath = path + "/ext";
+    std::string pyOldPythonPath = bp::env::getEnvVar(PYTHONPATH);
+    std::string pyNewPythonPath = pyPath + PATHDELIM + soPath;
+    bp::env::setEnvVar(PYTHONPATH, pyNewPythonPath);
+    s_argv = (char**) calloc(2, sizeof(char*));
     s_argv[0] = "BrowserPlus Embedded Python";
     s_argv[1] = NULL;
     // Still unclear wether this is all right.  Probably performed in
@@ -63,19 +76,10 @@ pythonThreadFunc(void* ctx) {
     Py_SetProgramName(s_argv[0]);
     Py_Initialize();
     PySys_SetArgv(s_argc, s_argv);
-    std::string pyPath = path + "/stdlib";
-    std::string soPath = path + "/ext";
-#if 0
-    python_incpush(pyPath.c_str());
-    python_incpush(soPath.c_str());
-#endif // 0
     bp_load_builtins();
-#if 0
-    // Include "browserplus.py" which cleans up the service authors
-    // definition semantics a bit.
-    rb_require("browserplus.py");
-    rb_require("pathname");
-#endif // 0
+    PyObject* modname = PyString_FromString("browserplus");
+    PyObject* bpModule = PyImport_Import(modname);
+    Py_XDECREF(modname);
     // Let's release the spawning thread.
     s_pythonLock.lock();
     s_running = true;
@@ -96,35 +100,25 @@ pythonThreadFunc(void* ctx) {
             }
             s_pythonLock.unlock();
         }
-        if (work == NULL) {
-#if 0
-            PyObject* sleepyTime = rb_float_new(0.05);
-            // Run the interpreter for a little bit to let background
-            // threads continue.
-            // NEEDSWORK!!!  This absolutely sucks.  How do we kick this
-            // python thread out of sleep when new work arrives?
-            // signals?  Something that we can do from another
-            // thread safely is needed here.
-            rb_funcall(rb_mKernel, rb_intern("sleep"), 1, sleepyTime);
-#endif // 0
-        } else {
+        if (work != NULL) {
             if (work->m_type == python::Work::T_LoadService) {
-#if 0
                 // First lets update require path.
                 std::string serviceDir = file::dirname(work->sarg);
-                python_incpush(serviceDir.c_str());
+                std::string pyExistingPythonPath = bp::env::getEnvVar(PYTHONPATH);
+                std::string pyUpdatedPythonPath = pyExistingPythonPath + PATHDELIM + serviceDir;
+                bp::env::setEnvVar(PYTHONPATH, pyUpdatedPythonPath);
                 // Read python source file.
                 std::string source = file::readFile(work->sarg);
                 if (source.empty()) {
                     work->m_error = true;
                     work->m_verboseError.append("couldn't read: '" + work->sarg + "'");
                 } else {
-                    int error = 0;
-                    (void)rb_eval_string_protect(source.c_str(), &error);
-                    if (error) {
+                    int error = PyRun_SimpleString(source.c_str());
+                    if (error != 0) {
                         work->m_error = true;
                         work->m_verboseError = python::getLastError();
-                    } else {
+                    }
+                    else {
                         // Now it's time to pull out the global symbol
                         // BrowserPlusEntryPointClass
                         // and call its to_service_description method
@@ -136,41 +130,34 @@ pythonThreadFunc(void* ctx) {
                         }
                     }
                 }
-#endif // 0
             }
             else if (work->m_type == python::Work::T_AllocateInstance) {
-#if 0
-                int error = 0;
-                PyObject* klass = rb_gv_get(python::BP_GLOBAL_DEF_SYM);
+                PyObject *m = PyImport_AddModule("__main__");
+                PyObject *klass = PyObject_GetAttrString(m, python::BP_GLOBAL_DEF_SYM);
                 // Initialize arguments.
-                PyObject* initArgs = bpObjectToPython(work->m_obj, 0);
-                int takesArg = 0;
-                ID initialize = rb_intern("initialize");
-                if (rb_method_boundp(klass, initialize, 0)) {
-                    PyObject* initMeth = python::invokeFunction(klass, "instance_method", &error, 1, ID2SYM(initialize));
-                    if (initMeth) {
-                        PyObject* arity = python::invokeFunction(initMeth, "arity", &error, 0);
-                        if (NUM2INT(arity) >= 1) {
-                            takesArg = 1;
-                        }
-                    }
-                }
-                work->m_instance = python::invokeFunction(klass, "new", &error, takesArg, initArgs);
-                if (error) {
+                PyObject* initArgs = (PyObject*)bpObjectToPython(work->m_obj, 0);
+                // NEEDSWORK!!!  Do we need to check if __init__ takes args and pass NULL if not?
+                work->m_instance = PyObject_CallObject(klass, initArgs);
+                if (work->m_instance == NULL) {
                     work->m_error = true;
                     work->m_verboseError = python::getLastError();
-                } else {
+                }
+                else {
                     gcArray.Register(work->m_instance);
                 }
-#endif // 0
+                Py_DECREF(initArgs);
+                Py_DECREF(klass);
             }
             else if (work->m_type == python::Work::T_InvokeMethod) {
-#if 0
                 int error = 0;
+#if 0
                 PyObject* tid = rb_uint_new(work->m_tid);
                 PyObject* trans = rb_class_new_instance(1, &tid, bp_py_cTransaction);
+#endif // 0
                 g_bpCoreFunctions->log(BP_DEBUG, "executing func '%s'", work->sarg.c_str());
+#if 0
                 python::invokeFunction(work->m_instance, work->sarg.c_str(), &error, 2, trans, bpObjectToPython(work->m_obj, work->m_tid));
+#endif // 0
                 if (error) {
                     g_bpCoreFunctions->postError(work->m_tid, "python.evalError", python::getLastError().c_str());
                 }
@@ -178,15 +165,12 @@ pythonThreadFunc(void* ctx) {
                     delete work->m_obj;
                     work->m_obj = NULL;
                 }
-#endif // 0
             }
             else if (work->m_type == python::Work::T_ReleaseInstance) {
-#if 0
-                if (rb_method_boundp(CLASS_OF(work->m_instance), rb_intern("destroy"), 1)) {
-                    (void) python::invokeFunction(work->m_instance, "destroy", &error, 0);
-                }
+                int error = 0;
+                (void)python::invokeFunction(work->m_instance, "destroy", &error, 0);
                 gcArray.Unregister(work->m_instance);
-#endif // 0
+                Py_DECREF(work->m_instance);
             }
             // Presence of syncLock indicates synchronous operation
             // (client freed).
@@ -200,6 +184,8 @@ pythonThreadFunc(void* ctx) {
             }
         }
     }
+    Py_XDECREF(bpModule);
+    bp::env::setEnvVar(PYTHONPATH, pyOldPythonPath);
     // Now we'll block and wait for work.
     s_pythonLock.unlock();
     return NULL;
