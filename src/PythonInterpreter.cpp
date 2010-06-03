@@ -30,7 +30,6 @@
  */
 
 #include "PythonHeaders.hh"
-#include "util/bpenv.hh"
 #include "util/bpthread.hh"
 #include "util/bpsync.hh"
 #include "util/fileutils.hh"
@@ -58,17 +57,18 @@ static std::list<python::Work *> s_workQueue;
 #else
 #define PATHDELIM ":"
 #endif
-#define PYTHONPATH "PYTHONPATH"
+static const std::string PYTHONPATH_CONST("PYTHONPATH");
 
 static void*
 pythonThreadFunc(void* ctx) {
     std::string path((const char*)ctx);
     std::string pyPath = path + "/stdlib";
     std::string soPath = path + "/ext";
-    std::string pyOldPythonPath = bp::env::getEnvVar(PYTHONPATH);
+    std::string pyOldPythonPath = getenv(PYTHONPATH_CONST.c_str());
     std::string pyNewPythonPath = pyPath + PATHDELIM + soPath;
-    bp::env::setEnvVar(PYTHONPATH, pyNewPythonPath);
-    s_argv = (char**) calloc(2, sizeof(char*));
+	std::string envValue = PYTHONPATH_CONST + "=" + pyNewPythonPath;
+    putenv(envValue.c_str());
+    s_argv = (char**)calloc(2, sizeof(char*));
     s_argv[0] = "BrowserPlus Embedded Python";
     s_argv[1] = NULL;
     // Still unclear wether this is all right.  Probably performed in
@@ -104,9 +104,10 @@ pythonThreadFunc(void* ctx) {
             if (work->m_type == python::Work::T_LoadService) {
                 // First lets update require path.
                 std::string serviceDir = file::dirname(work->sarg);
-                std::string pyExistingPythonPath = bp::env::getEnvVar(PYTHONPATH);
+                std::string pyExistingPythonPath = getenv(PYTHONPATH_CONST.c_str());
                 std::string pyUpdatedPythonPath = pyExistingPythonPath + PATHDELIM + serviceDir;
-                bp::env::setEnvVar(PYTHONPATH, pyUpdatedPythonPath);
+				std::string envValue = PYTHONPATH_CONST + "=" + pyUpdatedPythonPath;
+				putenv(envValue.c_str());
                 // Read python source file.
                 std::string source = file::readFile(work->sarg);
                 if (source.empty()) {
@@ -184,7 +185,8 @@ pythonThreadFunc(void* ctx) {
         }
     }
     Py_XDECREF(bpModule);
-    bp::env::setEnvVar(PYTHONPATH, pyOldPythonPath);
+	envValue = PYTHONPATH_CONST + "=" + pyOldPythonPath;
+	putenv(envValue.c_str());
     // Now we'll block and wait for work.
     s_pythonLock.unlock();
     return NULL;
