@@ -150,14 +150,13 @@ pythonThreadFunc(void* ctx) {
             }
             else if (work->m_type == python::Work::T_InvokeMethod) {
                 int error = 0;
-#if 0
-                PyObject* tid = rb_uint_new(work->m_tid);
-                PyObject* trans = rb_class_new_instance(1, &tid, bp_py_cTransaction);
-#endif // 0
+                PyObject* args = Py_BuildValue("l", work->m_tid);
+                PyObject* kwds = Py_BuildValue("");
+                PyObject* trans = PyType_GenericNew((PyTypeObject*)bp_py_cCallback, args, kwds);
+                Py_DECREF(kwds);
+                Py_DECREF(args);
                 g_bpCoreFunctions->log(BP_DEBUG, "executing func '%s'", work->sarg.c_str());
-#if 0
                 python::invokeFunction(work->m_instance, work->sarg.c_str(), &error, 2, trans, bpObjectToPython(work->m_obj, work->m_tid));
-#endif // 0
                 if (error) {
                     g_bpCoreFunctions->postError(work->m_tid, "python.evalError", python::getLastError().c_str());
                 }
