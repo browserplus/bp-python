@@ -67,7 +67,7 @@ pythonThreadFunc(void* ctx) {
     std::string pyOldPythonPath = getenv(PYTHONPATH_CONST.c_str());
     std::string pyNewPythonPath = pyPath + PATHDELIM + soPath;
 	std::string envValue = PYTHONPATH_CONST + "=" + pyNewPythonPath;
-    putenv(envValue.c_str());
+    putenv((char*)envValue.c_str());
     s_argv = (char**)calloc(2, sizeof(char*));
     s_argv[0] = "BrowserPlus Embedded Python";
     s_argv[1] = NULL;
@@ -107,7 +107,7 @@ pythonThreadFunc(void* ctx) {
                 std::string pyExistingPythonPath = getenv(PYTHONPATH_CONST.c_str());
                 std::string pyUpdatedPythonPath = pyExistingPythonPath + PATHDELIM + serviceDir;
 				std::string envValue = PYTHONPATH_CONST + "=" + pyUpdatedPythonPath;
-				putenv(envValue.c_str());
+				putenv((char*)envValue.c_str());
                 // Read python source file.
                 std::string source = file::readFile(work->sarg);
                 if (source.empty()) {
@@ -186,7 +186,7 @@ pythonThreadFunc(void* ctx) {
     }
     Py_XDECREF(bpModule);
 	envValue = PYTHONPATH_CONST + "=" + pyOldPythonPath;
-	putenv(envValue.c_str());
+	putenv((char*)envValue.c_str());
     // Now we'll block and wait for work.
     s_pythonLock.unlock();
     return NULL;
