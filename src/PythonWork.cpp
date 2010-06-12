@@ -34,6 +34,7 @@
  * which the interpreter is running
  */
 
+#include "PythonHeaders.hh" // must be included before *any* other headers
 #include "PythonWork.hh"
 
 python::Work::Work(python::Work::Type t)

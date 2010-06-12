@@ -29,7 +29,7 @@
  *
  */
 
-#include "PythonHeaders.hh"
+#include "PythonHeaders.hh" // must be included before *any* other headers
 #include "util/bpthread.hh"
 #include "util/bpsync.hh"
 #include "util/fileutils.hh"

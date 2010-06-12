@@ -28,6 +28,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "PythonHeaders.hh" // must be included before *any* other headers
 #include "BuiltIns.hh"
 #include "PythonUtils.hh"
 #include "DataMapping.hh"
@@ -116,7 +117,7 @@ static void dummyCB(void* context, unsigned int promptId, const BPElement* respo
 
 static PyObject*
 trans_prompt(Transaction* self, PyObject* args) {
-    const char* path;
+	const char* path;
     PyObject* pyData;
     if (!PyArg_ParseTuple(args, "sO", &path, &pyData)) {
         return NULL;
@@ -129,6 +130,7 @@ trans_prompt(Transaction* self, PyObject* args) {
     unsigned int x = g_bpCoreFunctions->prompt(self->tid, path, e, dummyCB, NULL);
     // Grab the passed-in block and increment a reference to it.
     // NEEDSWORK!!!  Python doesn't support blocks.  Should we use lambdas?
+	// Wait, python does support blocks.  but they are kinda second class.  hrm wtf
     // If so, use that lambda.
     PyObject* val = NULL;
     /*PyObject* val = rb_block_proc();*/

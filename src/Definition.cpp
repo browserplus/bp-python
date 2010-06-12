@@ -32,6 +32,7 @@
  * Code to extract a service definition from a python service.
  */
 
+#include "PythonHeaders.hh" // must be included before *any* other headers
 #include "Definition.hh"
 #include "PythonUtils.hh"
 #include <sstream>

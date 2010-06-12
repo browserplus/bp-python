@@ -28,6 +28,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "PythonHeaders.hh" // must be included before *any* other headers
 #include "PythonUtils.hh"
 
 std::string python::getLastError() {

@@ -28,8 +28,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "PythonHeaders.hh" // must be included before *any* other headers
 #include "PythonInterpreter.hh"
-#include "PythonHeaders.hh"
 #include "ServiceGlobals.hh"
 // Header files from the bp-service-tools project, which makes it
 // easier to deal in types that one may transmit across the service
