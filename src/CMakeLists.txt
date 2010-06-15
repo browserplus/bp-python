@@ -54,7 +54,13 @@ IF (NOT CMAKE_BUILD_TYPE)
 ENDIF ()
 
 SET(extDir "${CMAKE_CURRENT_SOURCE_DIR}/../external")
-SET(extLibDir "${extDir}/${CMAKE_SYSTEM_NAME}/lib/${CMAKE_BUILD_TYPE}")
+IF(WIN32)
+  SET(extLibDir "${extDir}/${CMAKE_SYSTEM_NAME}/lib/$(OutDir)")
+  SET(extLibDir_debug "${extDir}/${CMAKE_SYSTEM_NAME}/lib/Debug")
+  SET(extLibDir_release "${extDir}/${CMAKE_SYSTEM_NAME}/lib/Release")
+ELSE(WIN32)
+  SET(extLibDir "${extDir}/${CMAKE_SYSTEM_NAME}/lib/${CMAKE_BUILD_TYPE}")
+ENDIF(WIN32)
 SET(extIncDir "${extDir}/${CMAKE_SYSTEM_NAME}/include/python26")
 SET(CPPTOOLS_DIR "${extDir}/bp-service-tools/CppTools/src")
 
@@ -96,18 +102,35 @@ ENDIF ()
 
 FILE(GLOB_RECURSE HDRS "*.hh")
 
-SET(HDRS PythonInterpreter.hh)
+#SET(HDRS PythonInterpreter.hh)
 ADD_LIBRARY(${serviceName} MODULE ${EXT_SRCS} ${OS_SRCS} ${SRCS} ${HDRS})
 
 # find the path to the python library we'll link
 MESSAGE("looking in ${pythonLibPath}")
-FIND_LIBRARY(pythonDylib NAMES python2.6 python26
-             PATHS ${pythonLibPath}
-             NO_DEFAULT_PATH
-             NO_SYSTEM_ENVIRONMENT_PATH)
-GET_FILENAME_COMPONENT(pythonDylibName ${pythonDylib} NAME)
+IF(WIN32)
+  FIND_LIBRARY(pythonDylib_debug NAMES python2.6_d python26_d
+               PATHS ${extLibDir_debug}
+               NO_DEFAULT_PATH
+               NO_SYSTEM_ENVIRONMENT_PATH)
+  GET_FILENAME_COMPONENT(pythonDylibName_debug ${pythonDylib_debug} NAME)
+  FIND_LIBRARY(pythonDylib_release NAMES python2.6 python26
+               PATHS ${extLibDir_release}
+               NO_DEFAULT_PATH
+               NO_SYSTEM_ENVIRONMENT_PATH)
+  GET_FILENAME_COMPONENT(pythonDylibName_release ${pythonDylib_release} NAME)
 
-TARGET_LINK_LIBRARIES(${serviceName} ${pythonDylibName})
+  TARGET_LINK_LIBRARIES(${serviceName}
+	                debug ${pythonDylibName_debug}
+	                optimized ${pythonDylibName_release})
+ELSE(WIN32)
+  FIND_LIBRARY(pythonDylib NAMES python2.6 python26
+               PATHS ${pythonLibPath}
+               NO_DEFAULT_PATH
+               NO_SYSTEM_ENVIRONMENT_PATH)
+  GET_FILENAME_COMPONENT(pythonDylibName ${pythonDylib} NAME)
+
+  TARGET_LINK_LIBRARIES(${serviceName} ${pythonDylibName})
+ENDIF(WIN32)
 
 # create service directory
 FILE(MAKE_DIRECTORY ${outputDir})
@@ -131,22 +154,57 @@ ELSE ()
     SET(RM_CMD "del /f /q")
 ENDIF ()
 
-GET_FILENAME_COMPONENT( pythonDylibName ${pythonDylib} NAME )
-
 # get location of output service library
 GET_TARGET_PROPERTY(loc ${serviceName} LOCATION)
 
 # handle the .lib .dll dichotomy
-SET (pythonLibToShip ${pythonDylib})
 IF (WIN32)
-  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShipA ${pythonDylib})
-  STRING(REGEX REPLACE "/lib/" "/bin/" pythonLibToShip ${pythonLibToShipA})
+  SET (pythonLibToShip_debug ${pythonDylib_debug})
+  SET (pythonLibToShip_release ${pythonDylib_release})
+  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShipA_debug ${pythonDylib_debug})
+  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShipA_release ${pythonDylib_release})
+  STRING(REGEX REPLACE "/lib/" "/bin/" pythonLibToShip_debug ${pythonLibToShipA_debug})
+  STRING(REGEX REPLACE "/lib/" "/bin/" pythonLibToShip_release ${pythonLibToShipA_release})
+ELSE()
+  SET (pythonLibToShip ${pythonDylib})
 ENDIF ()
 
-MESSAGE("python library to link:  ${pythonDylib}" )
-MESSAGE("library to ship:       ${pythonLibToShip}")
+IF(WIN32)
+  MESSAGE("python library to link (debug):  ${pythonDylib_debug}" )
+  MESSAGE("python library to link (release):  ${pythonDylib_release}" )
+  MESSAGE("library to ship (debug):       ${pythonLibToShip_debug}")
+  MESSAGE("library to ship (release):       ${pythonLibToShip_release}")
+ELSE(WIN32)
+  MESSAGE("python library to link:  ${pythonDylib}" )
+  MESSAGE("library to ship:       ${pythonLibToShip}")
+ENDIF(WIN32)
 
-ADD_CUSTOM_COMMAND(
+IF(WIN32)
+  ADD_CUSTOM_COMMAND(
+    TARGET ${serviceName} POST_BUILD
+    COMMAND ${RM_CMD} \"${stdlibDest}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+                        \"${stdlibSource}\" \"${stdlibDest}\"
+    COMMAND ${CMAKE_COMMAND} -E echo
+                        \"${stdlibSource}\" \"${stdlibDest}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            \"${CMAKE_CURRENT_SOURCE_DIR}/python/browserplus.py\"
+            \"${stdlibDest}\"
+    COMMAND ${RM_CMD} \"${extDest}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+                        \"${extSource}\" \"${extDest}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            \"${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt\"
+            \"${outputDir}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            \"${pythonLibToShip_debug}\"
+            \"${outputDir}\"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            \"${pythonLibToShip_release}\"
+            \"${outputDir}\"
+  )
+ELSE(WIN32)
+  ADD_CUSTOM_COMMAND(
     TARGET ${serviceName} POST_BUILD
     COMMAND ${RM_CMD} \"${stdlibDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -165,7 +223,8 @@ ADD_CUSTOM_COMMAND(
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             \"${pythonLibToShip}\"
             \"${outputDir}\"
-)
+  )
+ENDIF(WIN32)
 
 IF (APPLE) 
   # repeat after me:  I love dylibs

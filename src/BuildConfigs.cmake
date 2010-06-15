@@ -22,17 +22,17 @@ IF(WIN32)
     SET(win32Defs "/DWINDOWS /D_WINDOWS /DWIN32 /D_WIN32 /DXP_WIN32 /DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /DNOSOUND /DNOCOMM /DNOMCX /DNOSERVICE /DNOIME /DNORPC")
     SET(disabledWarnings "/wd4100 /wd4127 /wd4201 /wd4250 /wd4251 /wd4275 /wd4800")
     SET(CMAKE_CXX_FLAGS
-        "${win32Defs} /EHsc /Gy /MT /W4 ${disabledWarnings} /Zi"
+        "${win32Defs} /EHsc /Gy /MD /W4 ${disabledWarnings} /Zi"
         CACHE STRING "BrowserPlus CXX flags" FORCE)
-    SET(CMAKE_CXX_FLAGS_DEBUG "/MTd /DDEBUG /D_DEBUG /Od /RTC1 /RTCc"
+    SET(CMAKE_CXX_FLAGS_DEBUG "/MDd /DDEBUG /D_DEBUG /Od /RTC1 /RTCc"
         CACHE STRING "BrowserPlus debug CXX flags" FORCE)
-    SET(CMAKE_CXX_FLAGS_RELEASE "/MT /DNDEBUG /O1"
+    SET(CMAKE_CXX_FLAGS_RELEASE "/MD /DNDEBUG /O1"
         CACHE STRING "BrowserPlus release CXX flags" FORCE)
   
     # libs to ignore, from http://msdn.microsoft.com/en-us/library/aa267384.aspx
     #
-    SET(noDefaultLibFlagsDebug "/NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:msvcrt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:msvcrtd.lib")
-    SET(noDefaultLibFlagsRelease "/NODEFAULTLIB:libc.lib /NODEFAULTLIB:msvcrt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib")
+    #SET(noDefaultLibFlagsDebug "/NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:msvcrt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:msvcrtd.lib")
+    #SET(noDefaultLibFlagsRelease "/NODEFAULTLIB:libc.lib /NODEFAULTLIB:msvcrt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib")
 
     SET(linkFlags "/DEBUG /MANIFEST:NO")
     SET(linkFlagsDebug " ${noDefaultLibFlagsDebug}")
