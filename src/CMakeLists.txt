@@ -15,7 +15,13 @@ SET (serviceName PythonInterpreter)
 
 PROJECT(${serviceName}Service)
 
-SET (outputDir "${CMAKE_CURRENT_BINARY_DIR}/${serviceName}")
+IF (WIN32)
+  SET (outputDir "${CMAKE_CURRENT_BINARY_DIR}/${serviceName}$(OutDir)")
+  SET (outputDir_debug "${CMAKE_CURRENT_BINARY_DIR}/${serviceName}Debug")
+  SET (outputDir_release "${CMAKE_CURRENT_BINARY_DIR}/${serviceName}Release")
+ELSE (WIN32)
+  SET (outputDir "${CMAKE_CURRENT_BINARY_DIR}/${serviceName}")
+ENDIF (WIN32)
 
 # build up the "platform identifier"
 IF (APPLE)
@@ -102,7 +108,6 @@ ENDIF ()
 
 FILE(GLOB_RECURSE HDRS "*.hh")
 
-#SET(HDRS PythonInterpreter.hh)
 ADD_LIBRARY(${serviceName} MODULE ${EXT_SRCS} ${OS_SRCS} ${SRCS} ${HDRS})
 
 # find the path to the python library we'll link
@@ -133,26 +138,17 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 # create service directory
+IF (WIN32)
+  FILE(MAKE_DIRECTORY ${outputDir_debug})
+  FILE(MAKE_DIRECTORY ${outputDir_release})
+ELSE (WIN32)
 FILE(MAKE_DIRECTORY ${outputDir})
+ENDIF (WIN32)
 
 IF (APPLE)
 #  ADD_CUSTOM_COMMAND(TARGET ${serviceName} POST_BUILD
 #                     COMMAND strip -x \"${outputDir}/${ServiceLibrary}\")
 ENDIF (APPLE)
-
-
-
-SET(stdlibDest "${outputDir}/stdlib")
-SET(stdlibSource "${extLibDir}/python/python/2.6.5")
-
-SET(extDest "${outputDir}/ext")
-SET(extSource "${extLibDir}/python2.6")
-
-IF (APPLE)
-    SET(RM_CMD rm -rf)
-ELSE ()
-    SET(RM_CMD "del /f /q")
-ENDIF ()
 
 # get location of output service library
 GET_TARGET_PROPERTY(loc ${serviceName} LOCATION)
@@ -161,62 +157,45 @@ GET_TARGET_PROPERTY(loc ${serviceName} LOCATION)
 IF (WIN32)
   SET (pythonLibToShip_debug ${pythonDylib_debug})
   SET (pythonLibToShip_release ${pythonDylib_release})
-  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShipA_debug ${pythonDylib_debug})
-  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShipA_release ${pythonDylib_release})
-  STRING(REGEX REPLACE "/lib/" "/bin/" pythonLibToShip_debug ${pythonLibToShipA_debug})
-  STRING(REGEX REPLACE "/lib/" "/bin/" pythonLibToShip_release ${pythonLibToShipA_release})
+  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShip_debug ${pythonDylib_debug})
+  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShip_release ${pythonDylib_release})
 ELSE()
   SET (pythonLibToShip ${pythonDylib})
 ENDIF ()
 
 IF(WIN32)
-  MESSAGE("python library to link (debug):  ${pythonDylib_debug}" )
-  MESSAGE("python library to link (release):  ${pythonDylib_release}" )
-  MESSAGE("library to ship (debug):       ${pythonLibToShip_debug}")
-  MESSAGE("library to ship (release):       ${pythonLibToShip_release}")
+  MESSAGE("python library to link (debug):   ${pythonDylib_debug}" )
+  MESSAGE("python library to link (release): ${pythonDylib_release}" )
+  MESSAGE("library to ship (debug):          ${pythonLibToShip_debug}")
+  MESSAGE("library to ship (release):        ${pythonLibToShip_release}")
 ELSE(WIN32)
-  MESSAGE("python library to link:  ${pythonDylib}" )
-  MESSAGE("library to ship:       ${pythonLibToShip}")
+  MESSAGE("python library to link: ${pythonDylib}" )
+  MESSAGE("library to ship:        ${pythonLibToShip}")
 ENDIF(WIN32)
+
+SET(stdlibSource "${extLibDir}")
+SET(stdlibDest "${outputDir}")
 
 IF(WIN32)
   ADD_CUSTOM_COMMAND(
     TARGET ${serviceName} POST_BUILD
-    COMMAND ${RM_CMD} \"${stdlibDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-                        \"${stdlibSource}\" \"${stdlibDest}\"
-    COMMAND ${CMAKE_COMMAND} -E echo
                         \"${stdlibSource}\" \"${stdlibDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             \"${CMAKE_CURRENT_SOURCE_DIR}/python/browserplus.py\"
             \"${stdlibDest}\"
-    COMMAND ${RM_CMD} \"${extDest}\"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                        \"${extSource}\" \"${extDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             \"${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt\"
             \"${outputDir}\"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            \"${pythonLibToShip_debug}\"
-            \"${outputDir}\"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            \"${pythonLibToShip_release}\"
-            \"${outputDir}\"
-  )
+    )
 ELSE(WIN32)
   ADD_CUSTOM_COMMAND(
     TARGET ${serviceName} POST_BUILD
-    COMMAND ${RM_CMD} \"${stdlibDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-                        \"${stdlibSource}\" \"${stdlibDest}\"
-    COMMAND ${CMAKE_COMMAND} -E echo
                         \"${stdlibSource}\" \"${stdlibDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             \"${CMAKE_CURRENT_SOURCE_DIR}/python/browserplus.py\"
             \"${stdlibDest}\"
-    COMMAND ${RM_CMD} \"${extDest}\"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                        \"${extSource}\" \"${extDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             \"${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt\"
             \"${outputDir}\"
@@ -239,14 +218,20 @@ IF (APPLE)
       COMMAND ${CMAKE_COMMAND} -E remove \"${outputDir}/${libpythonBefore}\"
       COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup.sh ${loc}
       COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup.sh ${loc}
-      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/ext_fixup.sh \"${extDest}\"
       )
 ENDIF ()
 
 # copy in manifest
 GET_FILENAME_COMPONENT(ServiceLibrary "${loc}" NAME)
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/manifest.json"
-               "${outputDir}/manifest.json") 
+IF (WIN32)
+  CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/manifest.json"
+                 "${outputDir_debug}/manifest.json") 
+  CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/manifest.json"
+                 "${outputDir_release}/manifest.json") 
+ELSE (WIN32)
+  CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/manifest.json"
+                 "${outputDir}/manifest.json") 
+ENDIF (WIN32)
 ADD_CUSTOM_COMMAND(TARGET ${serviceName} POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
                            \"${loc}\" \"${outputDir}\")
