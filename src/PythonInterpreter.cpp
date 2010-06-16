@@ -61,10 +61,11 @@ static const std::string PYTHONPATH_CONST("PYTHONPATH");
 
 static void*
 pythonThreadFunc(void* ctx) {
+	char* envVal = getenv(PYTHONPATH_CONST.c_str());
     std::string path((const char*)ctx);
     std::string pyPath = path + "/stdlib";
     std::string soPath = path + "/ext";
-    std::string pyOldPythonPath = getenv(PYTHONPATH_CONST.c_str());
+	std::string pyOldPythonPath = envVal != NULL ? envVal : "";
     std::string pyNewPythonPath = pyPath + PATHDELIM + soPath;
 	std::string envValue = PYTHONPATH_CONST + "=" + pyNewPythonPath;
     putenv((char*)envValue.c_str());
@@ -103,8 +104,9 @@ pythonThreadFunc(void* ctx) {
         if (work != NULL) {
             if (work->m_type == python::Work::T_LoadService) {
                 // First lets update require path.
+				char* envVal2 = getenv(PYTHONPATH_CONST.c_str());
                 std::string serviceDir = file::dirname(work->sarg);
-                std::string pyExistingPythonPath = getenv(PYTHONPATH_CONST.c_str());
+				std::string pyExistingPythonPath = envVal2 != NULL ? envVal2 : "";
                 std::string pyUpdatedPythonPath = pyExistingPythonPath + PATHDELIM + serviceDir;
 				std::string envValue = PYTHONPATH_CONST + "=" + pyUpdatedPythonPath;
 				putenv((char*)envValue.c_str());
