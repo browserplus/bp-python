@@ -30,6 +30,7 @@
 
 #include "PythonHeaders.hh" // must be included before *any* other headers
 #include "PythonInterpreter.hh"
+#include "PythonUtils.hh"
 #include "ServiceGlobals.hh"
 // Header files from the bp-service-tools project, which makes it
 // easier to deal in types that one may transmit across the service
@@ -52,8 +53,15 @@ BPCoreletDefinition s_pythonInterpreterDef = {
 
 const BPCFunctionTable* g_bpCoreFunctions;
 
+#ifdef WIN32
+#include <windows.h>
+#endif // WIN32
+
 const BPCoreletDefinition*
 BPPInitialize(const BPCFunctionTable* bpCoreFunctions, const BPElement* parameterMap) {
+#ifdef WIN32
+    DebugBreak();
+#endif // WIN32
     // The name of the python script and path can be extracted from the parameter map.
     bp::Object* obj = bp::Object::build(parameterMap);
     // First get the path.
@@ -61,9 +69,9 @@ BPPInitialize(const BPCFunctionTable* bpCoreFunctions, const BPElement* paramete
         delete obj;
         return NULL;
     }
-    std::string path(((bp::String*)obj->get("CoreletDirectory"))->value());
-    g_bpCoreFunctions = bpCoreFunctions;
+    std::string path(python::convertPathToNative(((bp::String*)obj->get("CoreletDirectory"))->value()));
     delete obj;
+    g_bpCoreFunctions = bpCoreFunctions;
     // This will go in the BrowserPlusCore log file at info level.  Nice.
     g_bpCoreFunctions->log(BP_INFO, "initializing python interpreter with service path: %s", path.c_str());
     // Now let's initialize the python Interpreter.
@@ -124,7 +132,7 @@ BPPAttach(unsigned int attachID, const BPElement* paramMap) {
         return NULL;
     }
     std::string path;
-    path.append(((bp::Path*)obj->get("CoreletDirectory"))->value());
+    path.append(python::convertPathToNative(((bp::Path*)obj->get("CoreletDirectory"))->value()));
     // Now get the script name.
     if (!obj->has("Parameters", BPTMap)) {
         delete obj;

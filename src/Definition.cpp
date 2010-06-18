@@ -46,7 +46,7 @@ extractString(PyObject* hash, const char* key, std::string& where) {
     where.clear();
     PyObject* rkey = PyString_FromString(key);
     PyObject* val = PyDict_GetItem(hash, rkey);
-    Py_DECREF(rkey);
+    Py_XDECREF(rkey);
     if (PyString_Check(val)) {
         where.append(PyString_AsString(val));
         result = true;
@@ -60,7 +60,7 @@ extractNumber(PyObject* hash, const char* key, unsigned int* where) {
     *where = 0;
     PyObject* rkey = PyString_FromString(key);
     PyObject* val = PyDict_GetItem(hash, rkey);
-    Py_DECREF(rkey);
+    Py_XDECREF(rkey);
     if (PyInt_Check(val)) {
         *where = PyInt_AS_LONG(val);
         result = true;
@@ -78,7 +78,7 @@ extractBool(PyObject* hash, const char* key, bool* where) {
     *where = false;
     PyObject* rkey = PyString_FromString(key);
     PyObject* val = PyDict_GetItem(hash, rkey);
-    Py_DECREF(rkey);
+    Py_XDECREF(rkey);
     if (PyBool_Check(val)) {
         if (val == Py_True) {
             *where = true;
@@ -158,7 +158,7 @@ processFunction(PyObject* hash, bp::service::Description* desc, std::string& ver
     {
         PyObject* rkey = PyString_FromString("arguments");
         PyObject* arr = PyDict_GetItem(hash, rkey);
-        Py_DECREF(rkey);
+        Py_XDECREF(rkey);
         if (!PyList_Check(arr)) {
             verboseError.append("'arguments' array missing from definition of");
             verboseError.append(f.name());
@@ -211,7 +211,7 @@ python::extractDefinition(std::string& verboseError)
             verboseError.append("python service lacks entry point class, cannot find ");
             verboseError.append(BP_GLOBAL_DEF_SYM);
             verboseError.append(", is bp_doc properly called?");
-            Py_DECREF(gv);
+            Py_XDECREF(gv);
             return NULL;
         }
         int error = 0;
@@ -219,16 +219,16 @@ python::extractDefinition(std::string& verboseError)
         if (error) {
             verboseError = formatError("couldn't attain service description");
             Py_XDECREF(defSym);
-            Py_DECREF(gv);
+            Py_XDECREF(gv);
             return NULL;
         }
         if (!PyDict_Check(defSym)) {
             verboseError.append(BP_EXTERNAL_REP_METHOD " returns invalid type");
-            Py_DECREF(defSym);
-            Py_DECREF(gv);
+            Py_XDECREF(defSym);
+            Py_XDECREF(gv);
             return NULL;
         }
-        Py_DECREF(gv);
+        Py_XDECREF(gv);
     }
     // Now we have a HASH ready to traverse!
     bp::service::Description* desc = new bp::service::Description;
@@ -237,21 +237,21 @@ python::extractDefinition(std::string& verboseError)
     if (!extractString(defSym, "name", s)) {
         verboseError.append("'name' missing from service description");
         delete desc;
-        Py_DECREF(defSym);
+        Py_XDECREF(defSym);
         return NULL;
     }
     desc->setName(s.c_str());
     if (!extractString(defSym, "documentation", s)) {
         verboseError.append("'documentation' missing from service description");
         delete desc;
-        Py_DECREF(defSym);
+        Py_XDECREF(defSym);
         return NULL;
     }
     desc->setDocString(s.c_str());
     if (!extractString(defSym, "version", s)) {
         verboseError.append("'version' missing from service description");
         delete desc;
-        Py_DECREF(defSym);
+        Py_XDECREF(defSym);
         return NULL;
     }
     // Now parse the version.
@@ -260,7 +260,7 @@ python::extractDefinition(std::string& verboseError)
         if (!v.parse(s)) {
             verboseError.append("malformed 'version' string");
             delete desc;
-            Py_DECREF(defSym);
+            Py_XDECREF(defSym);
             return NULL;
         }
         desc->setMajorVersion(v.majorVer());
@@ -271,11 +271,11 @@ python::extractDefinition(std::string& verboseError)
     {
         PyObject* rkey = PyString_FromString("functions");
         PyObject* arr = PyDict_GetItem(defSym, rkey);
-        Py_DECREF(rkey);
+        Py_XDECREF(rkey);
         if (!PyList_Check(arr)) {
             verboseError.append("'functions' array missing from service description");
             delete desc;
-            Py_DECREF(defSym);
+            Py_XDECREF(defSym);
             return NULL;
         }
         for (long int i = 0; true; i++) {
@@ -286,17 +286,17 @@ python::extractDefinition(std::string& verboseError)
             if (!PyDict_Check(rfHash)) {
                 verboseError.append("non-hash member found in 'functions' array\n");
                 delete desc;
-                Py_DECREF(defSym);
+                Py_XDECREF(defSym);
                 return NULL;
             }
             // Now process the function hash.
             if (!processFunction(rfHash, desc, verboseError)) {
                 delete desc;
-                Py_DECREF(defSym);
+                Py_XDECREF(defSym);
                 return NULL;
             }
         }
     }
-    Py_DECREF(defSym);
+    Py_XDECREF(defSym);
     return desc;
 }

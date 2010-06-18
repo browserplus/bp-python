@@ -35,13 +35,6 @@
 #ifndef __PYTHONHEADERS_H__
 #define __PYTHONHEADERS_H__
 
-#if 0
-extern "C" {
-    #define MS_NO_COREDLL
-    #include <Python.h>
-};
-#else // 0
 #include <Python.h>
-#endif // 0
 
 #endif // __PYTHONHEADERS_H__

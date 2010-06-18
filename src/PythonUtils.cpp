@@ -31,6 +31,25 @@
 #include "PythonHeaders.hh" // must be included before *any* other headers
 #include "PythonUtils.hh"
 
+#ifdef WIN32
+#define PATHDELIM '\\'
+#else // WIN32
+#define PATHDELIM '/'
+#endif // WIN32
+
+std::string python::convertPathToNative(const std::string& s) {
+    std::string s2;
+    for (std::string::const_iterator i = s.begin(); i != s.end(); i++) {
+        if (*i == '/') {
+            s2.push_back(PATHDELIM);
+        }
+        else {
+            s2.push_back(*i);
+        }
+    }
+    return s2;
+}
+
 std::string python::getLastError() {
     std::string s;
     PyObject* lasterr = PyErr_Occurred();
@@ -44,7 +63,7 @@ std::string python::getLastError() {
     if (pvalue != NULL) {
         PyObject* errstr = PyObject_Str(pvalue);
         s = PyString_AsString(errstr);
-        Py_DECREF(errstr);
+        Py_XDECREF(errstr);
     }
     PyErr_Restore(ptype, pvalue, ptraceback);
     return s;
@@ -169,6 +188,6 @@ python::invokeFunction(PyObject* r, const char* funcName, int* error, int nargs,
             break;
     }
     va_end(argh);
-    Py_DECREF(funcNameString);
+    Py_XDECREF(funcNameString);
     return result;
 }

@@ -53,21 +53,23 @@ static bool s_running = false;
 static std::list<python::Work *> s_workQueue;
 
 #ifdef WIN32
-#define PATHDELIM ";"
+#define PATHDELIM "\\"
+#define PATHSEP ";"
 #else
-#define PATHDELIM ":"
+#define PATHDELIM "/"
+#define PATHSEP ":"
 #endif
 static const std::string PYTHONPATH_CONST("PYTHONPATH");
 
 static void*
 pythonThreadFunc(void* ctx) {
-	char* envVal = getenv(PYTHONPATH_CONST.c_str());
+    char* envVal = getenv(PYTHONPATH_CONST.c_str());
     std::string path((const char*)ctx);
-    std::string pyPath = path + "/stdlib";
-    std::string soPath = path + "/ext";
-	std::string pyOldPythonPath = envVal != NULL ? envVal : "";
-    std::string pyNewPythonPath = pyPath + PATHDELIM + soPath;
-	std::string envValue = PYTHONPATH_CONST + "=" + pyNewPythonPath;
+    std::string pyPath = path + PATHDELIM + "stdlib";
+    std::string soPath = path + PATHDELIM + "ext";
+    std::string pyOldPythonPath = envVal != NULL ? envVal : "";
+    std::string pyNewPythonPath = pyPath + PATHSEP + soPath;
+    std::string envValue = PYTHONPATH_CONST + "=" + pyNewPythonPath;
     putenv((char*)envValue.c_str());
     s_argv = (char**)calloc(2, sizeof(char*));
     s_argv[0] = "BrowserPlus Embedded Python";
@@ -104,22 +106,26 @@ pythonThreadFunc(void* ctx) {
         if (work != NULL) {
             if (work->m_type == python::Work::T_LoadService) {
                 // First lets update require path.
-				char* envVal2 = getenv(PYTHONPATH_CONST.c_str());
+                char* envVal2 = getenv(PYTHONPATH_CONST.c_str());
                 std::string serviceDir = file::dirname(work->sarg);
-				std::string pyExistingPythonPath = envVal2 != NULL ? envVal2 : "";
-                std::string pyUpdatedPythonPath = pyExistingPythonPath + PATHDELIM + serviceDir;
-				std::string envValue = PYTHONPATH_CONST + "=" + pyUpdatedPythonPath;
-				putenv((char*)envValue.c_str());
+                std::string pyExistingPythonPath = envVal2 != NULL ? envVal2 : "";
+                std::string pyUpdatedPythonPath = pyExistingPythonPath + PATHSEP + serviceDir;
+                std::string envValue = PYTHONPATH_CONST + "=" + pyUpdatedPythonPath;
+                putenv((char*)envValue.c_str());
                 // Read python source file.
                 std::string source = file::readFile(work->sarg);
                 if (source.empty()) {
                     work->m_error = true;
                     work->m_verboseError.append("couldn't read: '" + work->sarg + "'");
                 } else {
-                    int error = PyRun_SimpleString(source.c_str());
-                    if (error != 0) {
+                    PyObject* dict = PyDict_New();
+                    PyObject* result = PyRun_String(source.c_str(), Py_file_input, dict, dict);
+                    if (result != NULL && result != Py_None) {
                         work->m_error = true;
-                        work->m_verboseError = python::getLastError();
+                        PyObject *resultString = PyObject_Str(result);
+                        Py_XDECREF(resultString);
+                        work->m_verboseError = PyString_AsString(resultString);
+                        //work->m_verboseError = python::getLastError();
                     }
                     else {
                         // Now it's time to pull out the global symbol
@@ -132,6 +138,8 @@ pythonThreadFunc(void* ctx) {
                             work->m_error = true;
                         }
                     }
+                    Py_XDECREF(dict);
+                    Py_XDECREF(result);
                 }
             }
             else if (work->m_type == python::Work::T_AllocateInstance) {
@@ -148,16 +156,16 @@ pythonThreadFunc(void* ctx) {
                 else {
                     gcArray.Register(work->m_instance);
                 }
-                Py_DECREF(initArgs);
-                Py_DECREF(klass);
+                Py_XDECREF(initArgs);
+                Py_XDECREF(klass);
             }
             else if (work->m_type == python::Work::T_InvokeMethod) {
                 int error = 0;
                 PyObject* args = Py_BuildValue("l", work->m_tid);
                 PyObject* kwds = Py_BuildValue("");
                 PyObject* trans = PyType_GenericNew((PyTypeObject*)bp_py_cCallback, args, kwds);
-                Py_DECREF(kwds);
-                Py_DECREF(args);
+                Py_XDECREF(kwds);
+                Py_XDECREF(args);
                 g_bpCoreFunctions->log(BP_DEBUG, "executing func '%s'", work->sarg.c_str());
                 python::invokeFunction(work->m_instance, work->sarg.c_str(), &error, 2, trans, bpObjectToPython(work->m_obj, work->m_tid));
                 if (error) {
@@ -172,7 +180,7 @@ pythonThreadFunc(void* ctx) {
                 int error = 0;
                 (void)python::invokeFunction(work->m_instance, "destroy", &error, 0);
                 gcArray.Unregister(work->m_instance);
-                Py_DECREF(work->m_instance);
+                Py_XDECREF(work->m_instance);
             }
             // Presence of syncLock indicates synchronous operation
             // (client freed).
@@ -187,8 +195,8 @@ pythonThreadFunc(void* ctx) {
         }
     }
     Py_XDECREF(bpModule);
-	envValue = PYTHONPATH_CONST + "=" + pyOldPythonPath;
-	putenv((char*)envValue.c_str());
+    envValue = PYTHONPATH_CONST + "=" + pyOldPythonPath;
+    putenv((char*)envValue.c_str());
     // Now we'll block and wait for work.
     s_pythonLock.unlock();
     return NULL;

@@ -2,7 +2,7 @@
   "type": "dependent",
   "uses": {
     "corelet": "PythonInterpreter",
-    "version": "5"
+    "version": "1"
   },
   "arguments": {
     "ScriptFile": "bad_type.py"

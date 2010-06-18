@@ -93,23 +93,23 @@ pythonToBPObject(void* v) {
 void* /*PyObject**/
 bpObjectToPython(const bp::Object* obj, unsigned int tid) {
     if (obj == NULL) {
-        Py_INCREF(Py_None);
+        Py_XINCREF(Py_None);
         return (void*)Py_None;
     }
     // To avoid multiple allocations, temporarily use NULL instead of Py_None.
     PyObject* v = NULL;
     switch (obj->type()) {
         case BPTNull:
-            Py_INCREF(Py_None);
+            Py_XINCREF(Py_None);
             v = Py_None;
             break;
         case BPTBoolean:
             if (((bp::Bool*)obj)->value()) {
-                Py_INCREF(Py_True);
+                Py_XINCREF(Py_True);
                 v = Py_True;
             }
             else {
-                Py_INCREF(Py_False);
+                Py_XINCREF(Py_False);
                 v = Py_False;
             }
             break;
@@ -154,8 +154,8 @@ bpObjectToPython(const bp::Object* obj, unsigned int tid) {
             PyObject* args = Py_BuildValue("ll", tid, ((bp::Integer*)obj)->value());
             PyObject* kwds = Py_BuildValue("");
             v = PyType_GenericNew((PyTypeObject*)bp_py_cCallback, args, kwds);
-            Py_DECREF(kwds);
-            Py_DECREF(args);
+            Py_XDECREF(kwds);
+            Py_XDECREF(args);
             break;
         }
         case BPTAny:
@@ -164,7 +164,7 @@ bpObjectToPython(const bp::Object* obj, unsigned int tid) {
     }
     // To avoid multiple allocations.
     if (v == NULL) {
-        Py_INCREF(Py_None);
+        Py_XINCREF(Py_None);
         v = Py_None;
     }
     return (void*)v;

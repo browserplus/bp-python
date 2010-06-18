@@ -41,6 +41,10 @@
 
 namespace python {
     /**
+     * Convert forward-slash style path to native path.  HACKY.
+     */
+    std::string convertPathToNative(const std::string& s);
+    /**
      * Get the last error encountered from the python evaluation environment.
      */
     std::string getLastError();
@@ -64,18 +68,18 @@ namespace python {
             // Dispose array and flush all elements.
             while (!objects.empty()) {
                 std::map<PyObject*, PyObject*>::iterator i = objects.begin();
-                Py_DECREF(i->second);
+                Py_XDECREF(i->second);
                 objects.erase(i);
             }
         }
         void Register(PyObject* object) {
             objects[object] = object;
-            Py_INCREF(object);
+            Py_XINCREF(object);
         }
         void Unregister(PyObject* object) {
             for (std::map<PyObject*, PyObject*>::iterator i = objects.begin(); i != objects.end(); i++) {
                 if (i->first == object) {
-                    Py_DECREF(i->second);
+                    Py_XDECREF(i->second);
                     objects.erase(i);
                     break;
                 }

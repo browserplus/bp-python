@@ -31,11 +31,11 @@
 #include "fileutils.hh"
 
 #ifdef WIN32
-#define PATHSEP		'\\'
-#define PATHPARENT	".."
+#define PATHSEP       '\\'
+#define PATHPARENT    ".."
 #else
-#define PATHSEP		'/'
-#define PATHPARENT	".."
+#define PATHSEP       '/'
+#define PATHPARENT    ".."
 #endif
 
 // read the contents of a file into a std::string
