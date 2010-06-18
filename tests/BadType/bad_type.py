@@ -6,8 +6,9 @@
 @bp_doc(BadType, "A hello world test service for BrowserPlus.")
 class BadType:
     @bp_doc(BadType, ":hello", "return the string, 'hello world'.  original, eh?\n\
-<who: string> who to say hello to.\n\
-[cb: bogus] a callback to invoke (with a bogus type name)"
+    <who: string> who to say hello to.\n\
+    [cb: bogus] a callback to invoke (with a bogus type name)")
     def hello(trans, args):
-        args[:cb].invoke("Hi there #{args[:who]}") if args.has_key? :cb
+        if cb in args:
+            args[cb].invoke("Hi there #{args[:who]}")
         trans.complete("hello #{args[:who]}")
