@@ -32,7 +32,7 @@ def bp_version(version_string):
         return service_class
     return decorator
 
-def bp_doc(service_method, doc_string):
+def bp_doc(method_string, doc_string = None):
     def decorator(service_class):
         global BrowserPlusEntryPointClass
         if (BrowserPlusEntryPointClass == None):
@@ -43,10 +43,12 @@ def bp_doc(service_method, doc_string):
             service_class.bp_doc = {}
         if (service_class.bp_doc == None):
             service_class.bp_doc = {}
-        # parse it out
+        real_method_string = method_string
         real_doc_string = doc_string
-        if (real_doc_string == None or real_doc_string == ""):
-            real_doc_string = service_method
+        if (doc_string == None or doc_string == ""):
+            real_doc_string = method_string
+            real_method_string = None
+        # parse it out
         ar = re.split(real_doc_string, '/^\s+([\[<])(\w+:\s*\w+)[\]>]\s+/')
         doc = ar[0]
         m = list(ar[1:])
@@ -65,7 +67,7 @@ def bp_doc(service_method, doc_string):
             elif (len(ar2) > 1):
                 aname = ar2[0]
             newlist[i] = {'name': aname, 'type': atype, 'documentation': chomp2(adoc), 'required': (bracket == "<")}
-            service_class.bp_doc[None] = [doc.strip(), newlist]
+            service_class.bp_doc[real_method_string] = [doc.strip(), newlist]
         return service_class
     return decorator
 
