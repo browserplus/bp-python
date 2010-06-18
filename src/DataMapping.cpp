@@ -38,8 +38,10 @@ bp::Object*
 pythonToBPObject(void* v) {
     bp::Object* obj = NULL;
     PyObject* pv = (PyObject*)v;
-    // Special case: since Python doesn't use NULL pointers except to indicate error condition.
-    if (pv == Py_None) {
+    if (pv == NULL) {
+        obj = NULL;
+    }
+    else if (pv == Py_None) {
         obj = new bp::Null();
     }
     else if (PyBool_Check(pv)) {

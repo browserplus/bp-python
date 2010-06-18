@@ -47,7 +47,7 @@ extractString(PyObject* hash, const char* key, std::string& where) {
     PyObject* rkey = PyString_FromString(key);
     PyObject* val = PyDict_GetItem(hash, rkey);
     Py_XDECREF(rkey);
-    if (PyString_Check(val)) {
+    if (val != NULL && PyString_Check(val)) {
         where.append(PyString_AsString(val));
         result = true;
     }
@@ -61,11 +61,11 @@ extractNumber(PyObject* hash, const char* key, unsigned int* where) {
     PyObject* rkey = PyString_FromString(key);
     PyObject* val = PyDict_GetItem(hash, rkey);
     Py_XDECREF(rkey);
-    if (PyInt_Check(val)) {
+    if (val != NULL && PyInt_Check(val)) {
         *where = PyInt_AS_LONG(val);
         result = true;
     }
-    else if (PyLong_Check(val)) {
+    else if (val != NULL && PyLong_Check(val)) {
         *where = PyLong_AsLong(val);
         result = true;
     }
@@ -79,7 +79,7 @@ extractBool(PyObject* hash, const char* key, bool* where) {
     PyObject* rkey = PyString_FromString(key);
     PyObject* val = PyDict_GetItem(hash, rkey);
     Py_XDECREF(rkey);
-    if (PyBool_Check(val)) {
+    if (val != NULL && PyBool_Check(val)) {
         if (val == Py_True) {
             *where = true;
             result = true;
@@ -159,7 +159,7 @@ processFunction(PyObject* hash, bp::service::Description* desc, std::string& ver
         PyObject* rkey = PyString_FromString("arguments");
         PyObject* arr = PyDict_GetItem(hash, rkey);
         Py_XDECREF(rkey);
-        if (!PyList_Check(arr)) {
+        if (arr == NULL || !PyList_Check(arr)) {
             verboseError.append("'arguments' array missing from definition of");
             verboseError.append(f.name());
             verboseError.append(" function");
@@ -170,7 +170,7 @@ processFunction(PyObject* hash, bp::service::Description* desc, std::string& ver
             if (rfHash == Py_None) {
                 break;
             }
-            if (!PyDict_Check(rfHash)) {
+            if (rfHash == NULL || !PyDict_Check(rfHash)) {
                 verboseError.append("non-hash member found in 'arguments' array for function ");
                 verboseError.append(f.name());
                 return false;
@@ -207,7 +207,7 @@ python::extractDefinition(std::string& verboseError)
         PyObject *m = PyImport_AddModule("__main__");
         PyObject *gv = PyObject_GetAttrString(m, BP_GLOBAL_DEF_SYM);
         // NEEDSWORK!!!  Is this correct?
-        if (!PyClass_Check(gv)) {
+        if (gv == NULL || !PyClass_Check(gv)) {
             verboseError.append("python service lacks entry point class, cannot find ");
             verboseError.append(BP_GLOBAL_DEF_SYM);
             verboseError.append(", is bp_doc properly called?");
@@ -222,7 +222,7 @@ python::extractDefinition(std::string& verboseError)
             Py_XDECREF(gv);
             return NULL;
         }
-        if (!PyDict_Check(defSym)) {
+        if (defSym == NULL || !PyDict_Check(defSym)) {
             verboseError.append(BP_EXTERNAL_REP_METHOD " returns invalid type");
             Py_XDECREF(defSym);
             Py_XDECREF(gv);
@@ -272,7 +272,7 @@ python::extractDefinition(std::string& verboseError)
         PyObject* rkey = PyString_FromString("functions");
         PyObject* arr = PyDict_GetItem(defSym, rkey);
         Py_XDECREF(rkey);
-        if (!PyList_Check(arr)) {
+        if (arr == NULL || !PyList_Check(arr)) {
             verboseError.append("'functions' array missing from service description");
             delete desc;
             Py_XDECREF(defSym);
@@ -283,7 +283,7 @@ python::extractDefinition(std::string& verboseError)
             if (rfHash == Py_None) {
                 break;
             }
-            if (!PyDict_Check(rfHash)) {
+            if (rfHash == NULL || !PyDict_Check(rfHash)) {
                 verboseError.append("non-hash member found in 'functions' array\n");
                 delete desc;
                 Py_XDECREF(defSym);
