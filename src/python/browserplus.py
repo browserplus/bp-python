@@ -1,5 +1,7 @@
 import re
 
+BrowserPlusEntryPointClass = None
+
 # divide a list into chunks
 def div_list(a, len):
     new_list = []
@@ -18,8 +20,6 @@ def chomp2(s):
     news = news.rstrip('\n')
     news = news.rstrip('\r')
     return news
-
-BrowserPlusEntryPointClass = None
 
 def bp_version(version_string):
     def decorator(service_class):
