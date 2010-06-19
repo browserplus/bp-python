@@ -204,6 +204,18 @@ python::extractDefinition(std::string& verboseError)
     // c++/c representation of the services interface.
     PyObject* defSym = 0;
     {
+////
+PyObject* x1 = PyImport_AddModule("browserplus");
+PyObject* d1 = PyModule_GetDict(x1);
+PyObject *key, *value;
+Py_ssize_t pos = 0;
+while (PyDict_Next(d1, &pos, &key, &value)) {
+	char* c = PyString_AsString(key);
+	printf(c);
+}
+Py_XDECREF(d1);
+Py_XDECREF(x1);
+////
         PyObject *m = PyImport_AddModule("__main__");
         PyObject *gv = PyObject_GetAttrString(m, BP_GLOBAL_DEF_SYM);
         // NEEDSWORK!!!  Is this correct?

@@ -174,7 +174,7 @@ static PyMethodDef Transaction_methods[] = {
 static PyTypeObject TransactionType = {
     PyObject_HEAD_INIT(NULL)
     0,                                        /*ob_size*/
-    "browserplus.Transaction",                /*tp_name*/
+    "browserplus_internal.Transaction",       /*tp_name*/
     sizeof(Transaction),                      /*tp_basicsize*/
     0,                                        /*tp_itemsize*/
     (destructor)Transaction_dealloc,          /*tp_dealloc*/
@@ -303,7 +303,7 @@ static PyMethodDef Callback_methods[] = {
 static PyTypeObject CallbackType = {
     PyObject_HEAD_INIT(NULL)
     0,                                        /*ob_size*/
-    "browserplus.Callback",                   /*tp_name*/
+    "browserplus_internal.Callback",          /*tp_name*/
     sizeof(Callback),                         /*tp_basicsize*/
     0,                                        /*tp_itemsize*/
     (destructor)Callback_dealloc,             /*tp_dealloc*/
@@ -360,7 +360,7 @@ bp_load_builtins() {
     if (PyType_Ready(&CallbackType) < 0) {
         return;
     }
-    PyObject* m = Py_InitModule3("browserplus", module_methods, "BrowserPlus Built-Ins.");
+    PyObject* m = Py_InitModule3("browserplus_internal", module_methods, "BrowserPlus Built-Ins.");
     if (m == NULL) {
         return;
     }
