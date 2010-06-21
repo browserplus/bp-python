@@ -1,12 +1,12 @@
 import re
-#import pprint
 
+global BrowserPlusEntryPointClass
 BrowserPlusEntryPointClass = None
 
 # divide a list into chunks
 def div_list(a, len):
     new_list = []
-    for x, i in enumerate(a):
+    for i, x in enumerate(a):
         if (i % len == 0):
             new_list.append([])
         sub_list = new_list[i / len]
@@ -36,7 +36,6 @@ def bp_version(version_string):
 def bp_doc(method_string, doc_string = None):
     def decorator(service_class):
         global BrowserPlusEntryPointClass
-        #pp = pprint.PrettyPrinter(indent=4)
         if (BrowserPlusEntryPointClass == None):
             BrowserPlusEntryPointClass = service_class
         elif (BrowserPlusEntryPointClass != service_class):
@@ -50,41 +49,31 @@ def bp_doc(method_string, doc_string = None):
         if (doc_string == None or doc_string == ""):
             real_doc_string = method_string
             real_method_string = None
-        #print "real_doc_string=", real_doc_string
-        #print "real_doc_string=", real_method_string
         # parse it out
-        ar = re.split('/^\s+([\[<])(\w+:\s*\w+)[\]>]\s+/', real_doc_string)
-        #ar = re.split('^\s+([\[<])(\w+:\s*\w+)[\]>]\s+', real_doc_string)
-        #pp.pprint(ar)
-        #print len(ar)
-        #blah = "this is a test"
-        #blahar = re.split('\W', blah)
-        #pp.pprint(blahar)
-        #print len(blahar)
+        rgx = re.compile(r'^\s+([\[<])(\w*:\s*\w*)[\]>]\s+', re.MULTILINE)
+        ar = rgx.split(real_doc_string)
         doc = ar[0]
-        #print "doc=", doc
         m = list(ar[1:])
-        #pp.pprint(m)
         m = div_list(m, 3)
-        #pp.pprint(m)
         newlist = []
-        for x, i in enumerate(m):
-            bracket = x[0]
-            arg = x[1]
-            adoc = x[2]
-            ar2 = re.split('/:\s*/', arg)
-            aname = ''
-            atype = ''
-            if (len(ar2) > 2):
-                aname = ar2[0]
-                atype = ar2[1]
-            elif (len(ar2) > 1):
-                aname = ar2[0]
-            newlist[i] = {'name': aname, 'type': atype, 'documentation': chomp2(adoc), 'required': (bracket == "<")}
+        if len(m) == 0:
             service_class.bp_doc[real_method_string] = [doc.strip(), newlist]
-        #print "----bp_doc----"
-        #pp.pprint(service_class.bp_doc)
-        #print "====bp_doc===="
+        else:
+            for i, x in enumerate(m):
+                bracket = x[0]
+                arg = x[1]
+                adoc = x[2]
+                rgx2 = re.compile(r':\s*')
+                ar2 = rgx2.split(arg)
+                aname = ''
+                atype = ''
+                if (len(ar2) > 2):
+                    aname = ar2[0]
+                    atype = ar2[1]
+                elif (len(ar2) > 1):
+                    aname = ar2[0]
+                newlist.append({'name': aname, 'type': atype, 'documentation': chomp2(adoc), 'required': (bracket == "<")})
+                service_class.bp_doc[real_method_string] = [doc.strip(), newlist]
         return service_class
     return decorator
 
@@ -96,7 +85,7 @@ def bp_to_service_description(service_class):
     keys = service_class.bp_doc.keys()
     keys = keys.sort()
     flist = []
-    for x, i in enumerate(keys):
+    for i, x in enumerate(keys):
         bpd = service_class.bp_doc[x]
         flist.append({'name': x, 'documentation': bpd[0], 'arguments': bpd[1]})
     hsh['functions'] = flist
