@@ -61,16 +61,55 @@ static std::list<python::Work *> s_workQueue;
 #endif
 static const std::string PYTHONPATH_CONST("PYTHONPATH");
 
-static void*
-pythonThreadFunc(void* ctx) {
+void
+AppendPythonPath_BeforeInit(const std::string& s) {
     char* envVal = getenv(PYTHONPATH_CONST.c_str());
-    std::string path((const char*)ctx);
-    std::string pyPath = path + PATHDELIM + "stdlib";
-    std::string soPath = path + PATHDELIM + "ext";
     std::string pyOldPythonPath = envVal != NULL ? envVal : "";
-    std::string pyNewPythonPath = pyPath + PATHSEP + soPath;
+    std::string pyNewPythonPath = pyOldPythonPath + PATHSEP + s;
     std::string envValue = PYTHONPATH_CONST + "=" + pyNewPythonPath;
     putenv((char*)envValue.c_str());
+}
+#include <windows.h>
+void
+PrintPythonPath_AfterInit() {
+    PyObject* m = PyImport_ImportModule("sys");
+	if (m != NULL) {
+		PyObject *o = PyObject_GetAttrString(m, "path");
+		if (PyList_Check(o)) {
+			OutputDebugStringA("sys.path start---\n");
+			Py_ssize_t i;
+			for (i = 0; i < PyList_GET_SIZE(o); i++) {
+				PyObject* s = PyList_GET_ITEM(o, i);
+				OutputDebugStringA(PyString_AS_STRING(s));
+				OutputDebugStringA("\n");
+			}
+			OutputDebugStringA("sys.path end---\n");
+        }
+	}
+	Py_XDECREF(m);
+}
+
+void
+AppendPythonPath_AfterInit(const std::string& s) {
+    PyObject* m = PyImport_ImportModule("sys");
+	if (m != NULL) {
+		PyObject *o = PyObject_GetAttrString(m, "path");
+		if (PyList_Check(o)) {
+            PyList_Append(o, PyString_FromString(s.c_str()));
+        }
+	}
+	Py_XDECREF(m);
+	PrintPythonPath_AfterInit();
+}
+
+static void*
+pythonThreadFunc(void* ctx) {
+    std::string ctxPath((const char*)ctx);
+    std::string pyPath = ctxPath + PATHDELIM + "stdlib";
+    std::string soPath = ctxPath + PATHDELIM + "ext";
+	AppendPythonPath_BeforeInit(ctxPath);
+	AppendPythonPath_BeforeInit(pyPath);
+	AppendPythonPath_BeforeInit(soPath);
     s_argv = (char**)calloc(2, sizeof(char*));
     s_argv[0] = "BrowserPlus Embedded Python";
     s_argv[1] = NULL;
@@ -80,9 +119,13 @@ pythonThreadFunc(void* ctx) {
     Py_Initialize();
     PySys_SetArgv(s_argc, s_argv);
     bp_load_builtins();
-    PyObject* modname = PyString_FromString("browserplus");
-    PyObject* bpModule = PyImport_Import(modname);
-    Py_XDECREF(modname);
+	AppendPythonPath_AfterInit(ctxPath);
+	AppendPythonPath_AfterInit(pyPath);
+	AppendPythonPath_AfterInit(soPath);
+    //PyObject* modname = PyString_FromString("browserplus");
+    //PyObject* bpModule = PyImport_Import(modname);
+    //Py_XDECREF(modname);
+    PyObject* bpModule = PyImport_ImportModule("browserplus_internal");
     // Let's release the spawning thread.
     s_pythonLock.lock();
     s_running = true;
@@ -108,24 +151,24 @@ pythonThreadFunc(void* ctx) {
                 // First lets update require path.
                 char* envVal2 = getenv(PYTHONPATH_CONST.c_str());
                 std::string serviceDir = file::dirname(work->sarg);
-                std::string pyExistingPythonPath = envVal2 != NULL ? envVal2 : "";
-                std::string pyUpdatedPythonPath = pyExistingPythonPath + PATHSEP + serviceDir;
-                std::string envValue = PYTHONPATH_CONST + "=" + pyUpdatedPythonPath;
-                putenv((char*)envValue.c_str());
+				AppendPythonPath_AfterInit(serviceDir);
                 // Read python source file.
-                std::string source = file::readFile(work->sarg);
-                if (source.empty()) {
-                    work->m_error = true;
-                    work->m_verboseError.append("couldn't read: '" + work->sarg + "'");
-                } else {
-                    PyObject* dict = PyDict_New();
-                    PyObject* result = PyRun_String(source.c_str(), Py_file_input, dict, dict);
-                    if (result != NULL && result != Py_None) {
+                //std::string source = file::readFile(work->sarg);
+                //if (source.empty()) {
+                //    work->m_error = true;
+                //    work->m_verboseError.append("couldn't read: '" + work->sarg + "'");
+                //} else {
+				std::string source = file::basefilename(work->sarg);
+                    //PyObject* dict = PyDict_New();
+                    //PyObject* result = PyRun_String(source.c_str(), Py_file_input, dict, dict);
+                    PyObject* result = PyImport_ImportModule(source.c_str());
+                    result = PyImport_ImportModule("browserplus");
+                    result = PyImport_ImportModule("re");
+                    if (result == NULL && result == Py_None) {
                         work->m_error = true;
                         PyObject *resultString = PyObject_Str(result);
                         Py_XDECREF(resultString);
                         work->m_verboseError = PyString_AsString(resultString);
-                        //work->m_verboseError = python::getLastError();
                     }
                     else {
                         // Now it's time to pull out the global symbol
@@ -138,9 +181,9 @@ pythonThreadFunc(void* ctx) {
                             work->m_error = true;
                         }
                     }
-                    Py_XDECREF(dict);
+                    //Py_XDECREF(dict);
                     Py_XDECREF(result);
-                }
+                //}
             }
             else if (work->m_type == python::Work::T_AllocateInstance) {
                 PyObject *m = PyImport_AddModule("__main__");
@@ -195,8 +238,6 @@ pythonThreadFunc(void* ctx) {
         }
     }
     Py_XDECREF(bpModule);
-    envValue = PYTHONPATH_CONST + "=" + pyOldPythonPath;
-    putenv((char*)envValue.c_str());
     // Now we'll block and wait for work.
     s_pythonLock.unlock();
     return NULL;

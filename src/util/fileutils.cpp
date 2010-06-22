@@ -71,3 +71,28 @@ std::string file::dirname(const std::string & path)
     }
     return path.substr(0, i);
 }
+
+// get the file name of a path
+std::string file::filename(const std::string & path)
+{
+    size_t i = path.rfind(PATHSEP);
+    if (i == std::string::npos) {
+        return ".";
+    } else if (i == path.length() - 1) {
+        return path;
+    }
+    return path.substr(i + 1, std::string::npos);
+}
+
+// get the file name of a path, without extension
+std::string file::basefilename(const std::string & path)
+{
+    std::string f = filename(path);
+    size_t i = f.rfind('.');
+    if (i == std::string::npos) {
+        return ".";
+    } else if (i == f.length() - 1) {
+        return f;
+    }
+    return f.substr(0, i);
+}

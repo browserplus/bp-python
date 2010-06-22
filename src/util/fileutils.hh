@@ -40,6 +40,12 @@ namespace file {
 
     // get the directory name of a path
     std::string dirname(const std::string & path);
+
+    // get the file name of a path
+    std::string filename(const std::string & path);
+
+    // get the file name of a path, without extension
+    std::string basefilename(const std::string & path);
     
 };
 

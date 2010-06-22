@@ -194,7 +194,8 @@ formatError(const char* e) {
     ss << e << ": " << python::getLastError();
     return ss.str();
 }
-
+#include <string>
+#include <windows.h>
 bp::service::Description*
 python::extractDefinition(std::string& verboseError)
 {
@@ -205,16 +206,29 @@ python::extractDefinition(std::string& verboseError)
     PyObject* defSym = 0;
     {
 ////
-PyObject* x1 = PyImport_AddModule("browserplus");
-PyObject* d1 = PyModule_GetDict(x1);
-PyObject *key, *value;
-Py_ssize_t pos = 0;
-while (PyDict_Next(d1, &pos, &key, &value)) {
-	char* c = PyString_AsString(key);
-	printf(c);
+PyObject* x1 = PyImport_GetModuleDict();
+PyObject *key1, *value1;
+Py_ssize_t pos1 = 0;
+while (PyDict_Next(x1, &pos1, &key1, &value1)) {
+	char* c1 = PyString_AsString(key1);
+	OutputDebugStringA(c1);
+	OutputDebugStringA("\n");
+	PyObject* x2 = PyImport_AddModule(c1);
+	PyObject* d2 = PyModule_GetDict(x2);
+	PyObject *key2, *value2;
+	Py_ssize_t pos2 = 0;
+	while (PyDict_Next(d2, &pos2, &key2, &value2)) {
+		char* c2 = PyString_AsString(key2);
+		OutputDebugStringA("\t");
+		OutputDebugStringA(c1);
+		OutputDebugStringA("::");
+		OutputDebugStringA(c2);
+		OutputDebugStringA("\n");
+	}
+	//Py_XDECREF(d2);
+	//Py_XDECREF(x2);
 }
-Py_XDECREF(d1);
-Py_XDECREF(x1);
+//Py_XDECREF(x1);
 ////
         PyObject *m = PyImport_AddModule("__main__");
         PyObject *gv = PyObject_GetAttrString(m, BP_GLOBAL_DEF_SYM);
