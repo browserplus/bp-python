@@ -72,7 +72,7 @@ std::string python::getLastError() {
 #define MAX_ARGS 32
 
 PyObject*
-python::invokeFunction(PyObject* r, const char* funcName, int* error, int nargs, ...)
+python::invokeFunction(PyObject *r, const char* funcName, int* error, int nargs, ...)
 {
     // NEEDSWORK!!!  We're assuming 'r' is not NULL and not Py_None.
     // Should we validate and throw an Py Exception otherwise?
@@ -80,107 +80,111 @@ python::invokeFunction(PyObject* r, const char* funcName, int* error, int nargs,
     assert(nargs < MAX_ARGS);
     va_list argh;
     va_start(argh, nargs);
-    PyObject* funcNameString = PyString_FromString(funcName);
+	PyObject* pyArgs[MAX_ARGS];
+	for (int i = 0; i < nargs; i++) {
+		pyArgs[i] = va_arg(argh, PyObject*);
+	}
+	PyObject* f = PyObject_GetAttrString(r, funcName);
     PyObject* result;
     switch (nargs) {
         case 0:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, NULL);
+            result = PyObject_CallFunctionObjArgs(f, NULL);
             break;
         case 1:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], NULL);
             break;
         case 2:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], NULL);
             break;
         case 3:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], NULL);
             break;
         case 4:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], NULL);
             break;
         case 5:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], NULL);
             break;
         case 6:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], NULL);
             break;
         case 7:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], NULL);
             break;
         case 8:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], NULL);
             break;
         case 9:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], NULL);
             break;
         case 10:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], NULL);
             break;
         case 11:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], NULL);
             break;
         case 12:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], NULL);
             break;
         case 13:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], NULL);
             break;
         case 14:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], NULL);
             break;
         case 15:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], NULL);
             break;
         case 16:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], NULL);
             break;
         case 17:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], NULL);
             break;
         case 18:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], NULL);
             break;
         case 19:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], NULL);
             break;
         case 20:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], NULL);
             break;
         case 21:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], NULL);
             break;
         case 22:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], NULL);
             break;
         case 23:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], argh[22], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], NULL);
             break;
         case 24:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], argh[22], argh[23], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], NULL);
             break;
         case 25:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], argh[22], argh[23], argh[24], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], NULL);
             break;
         case 26:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], argh[22], argh[23], argh[24], argh[25], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], NULL);
             break;
         case 27:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], argh[22], argh[23], argh[24], argh[25], argh[26], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], NULL);
             break;
         case 28:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], argh[22], argh[23], argh[24], argh[25], argh[26], argh[27], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], pyArgs[27], NULL);
             break;
         case 29:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], argh[22], argh[23], argh[24], argh[25], argh[26], argh[27], argh[28], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], pyArgs[27], pyArgs[28], NULL);
             break;
         case 30:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], argh[22], argh[23], argh[24], argh[25], argh[26], argh[27], argh[28], argh[29], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], pyArgs[27], pyArgs[28], pyArgs[29], NULL);
             break;
         case 31:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], argh[22], argh[23], argh[24], argh[25], argh[26], argh[27], argh[28], argh[29], argh[30], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], pyArgs[27], pyArgs[28], pyArgs[29], pyArgs[30], NULL);
             break;
         case 32:
-            result = PyObject_CallMethodObjArgs(r, funcNameString, argh[0], argh[1], argh[2], argh[3], argh[4], argh[5], argh[6], argh[7], argh[8], argh[9], argh[10], argh[11], argh[12], argh[13], argh[14], argh[15], argh[16], argh[17], argh[18], argh[19], argh[20], argh[21], argh[22], argh[23], argh[24], argh[25], argh[26], argh[27], argh[28], argh[29], argh[30], argh[31], NULL);
+            result = PyObject_CallFunctionObjArgs(f, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], pyArgs[27], pyArgs[28], pyArgs[29], pyArgs[30], pyArgs[31], NULL);
             break;
         default:
             result = NULL;
@@ -188,6 +192,139 @@ python::invokeFunction(PyObject* r, const char* funcName, int* error, int nargs,
             break;
     }
     va_end(argh);
+	if (result == NULL)
+	{
+		std::string s = python::getLastError();
+	}
+    Py_XDECREF(f);
+    return result;
+}
+
+PyObject*
+python::invokeMethod(PyObject* r, const char* funcName, int* error, int nargs, ...)
+{
+    // NEEDSWORK!!!  We're assuming 'r' is not NULL and not Py_None.
+    // Should we validate and throw an Py Exception otherwise?
+    *error = 0;
+    assert(nargs < MAX_ARGS);
+    va_list argh;
+    va_start(argh, nargs);
+	PyObject* pyArgs[MAX_ARGS];
+	for (int i = 0; i < nargs; i++) {
+		pyArgs[i] = va_arg(argh, PyObject*);
+	}
+    PyObject* funcNameString = PyString_FromString(funcName);
+    PyObject* result;
+    switch (nargs) {
+        case 0:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, NULL);
+            break;
+        case 1:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], NULL);
+            break;
+        case 2:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], NULL);
+            break;
+        case 3:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], NULL);
+            break;
+        case 4:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], NULL);
+            break;
+        case 5:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], NULL);
+            break;
+        case 6:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], NULL);
+            break;
+        case 7:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], NULL);
+            break;
+        case 8:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], NULL);
+            break;
+        case 9:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], NULL);
+            break;
+        case 10:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], NULL);
+            break;
+        case 11:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], NULL);
+            break;
+        case 12:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], NULL);
+            break;
+        case 13:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], NULL);
+            break;
+        case 14:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], NULL);
+            break;
+        case 15:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], NULL);
+            break;
+        case 16:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], NULL);
+            break;
+        case 17:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], NULL);
+            break;
+        case 18:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], NULL);
+            break;
+        case 19:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], NULL);
+            break;
+        case 20:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], NULL);
+            break;
+        case 21:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], NULL);
+            break;
+        case 22:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], NULL);
+            break;
+        case 23:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], NULL);
+            break;
+        case 24:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], NULL);
+            break;
+        case 25:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], NULL);
+            break;
+        case 26:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], NULL);
+            break;
+        case 27:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], NULL);
+            break;
+        case 28:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], pyArgs[27], NULL);
+            break;
+        case 29:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], pyArgs[27], pyArgs[28], NULL);
+            break;
+        case 30:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], pyArgs[27], pyArgs[28], pyArgs[29], NULL);
+            break;
+        case 31:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], pyArgs[27], pyArgs[28], pyArgs[29], pyArgs[30], NULL);
+            break;
+        case 32:
+            result = PyObject_CallMethodObjArgs(r, funcNameString, pyArgs[0], pyArgs[1], pyArgs[2], pyArgs[3], pyArgs[4], pyArgs[5], pyArgs[6], pyArgs[7], pyArgs[8], pyArgs[9], pyArgs[10], pyArgs[11], pyArgs[12], pyArgs[13], pyArgs[14], pyArgs[15], pyArgs[16], pyArgs[17], pyArgs[18], pyArgs[19], pyArgs[20], pyArgs[21], pyArgs[22], pyArgs[23], pyArgs[24], pyArgs[25], pyArgs[26], pyArgs[27], pyArgs[28], pyArgs[29], pyArgs[30], pyArgs[31], NULL);
+            break;
+        default:
+            result = NULL;
+            // NEEDSWORK!!!  We should probably do a python exception here?
+            break;
+    }
+    va_end(argh);
+	if (result == NULL)
+	{
+		std::string s = python::getLastError();
+	}
     Py_XDECREF(funcNameString);
     return result;
 }

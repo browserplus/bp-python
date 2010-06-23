@@ -105,11 +105,15 @@ AppendPythonPath_AfterInit(const std::string& s) {
 static void*
 pythonThreadFunc(void* ctx) {
     std::string ctxPath((const char*)ctx);
-    std::string pyPath = ctxPath + PATHDELIM + "stdlib";
-    std::string soPath = ctxPath + PATHDELIM + "ext";
+    std::string soPath1 = ctxPath + PATHDELIM + "lib";
+    std::string soPath2 = soPath1 + PATHDELIM + "plat-win";
+    std::string soPath3 = soPath1 + PATHDELIM + "lib-tk";
+    std::string soPath4 = soPath1 + PATHDELIM + "site-packages";
 	AppendPythonPath_BeforeInit(ctxPath);
-	AppendPythonPath_BeforeInit(pyPath);
-	AppendPythonPath_BeforeInit(soPath);
+	AppendPythonPath_BeforeInit(soPath1);
+	AppendPythonPath_BeforeInit(soPath2);
+	AppendPythonPath_BeforeInit(soPath3);
+	AppendPythonPath_BeforeInit(soPath4);
     s_argv = (char**)calloc(2, sizeof(char*));
     s_argv[0] = "BrowserPlus Embedded Python";
     s_argv[1] = NULL;
@@ -120,8 +124,10 @@ pythonThreadFunc(void* ctx) {
     PySys_SetArgv(s_argc, s_argv);
     bp_load_builtins();
 	AppendPythonPath_AfterInit(ctxPath);
-	AppendPythonPath_AfterInit(pyPath);
-	AppendPythonPath_AfterInit(soPath);
+	AppendPythonPath_AfterInit(soPath1);
+	AppendPythonPath_AfterInit(soPath2);
+	AppendPythonPath_AfterInit(soPath3);
+	AppendPythonPath_AfterInit(soPath4);
     //PyObject* modname = PyString_FromString("browserplus");
     //PyObject* bpModule = PyImport_Import(modname);
     //Py_XDECREF(modname);
@@ -162,8 +168,6 @@ pythonThreadFunc(void* ctx) {
                     //PyObject* dict = PyDict_New();
                     //PyObject* result = PyRun_String(source.c_str(), Py_file_input, dict, dict);
                     PyObject* result = PyImport_ImportModule(source.c_str());
-                    result = PyImport_ImportModule("browserplus");
-                    result = PyImport_ImportModule("re");
                     if (result == NULL && result == Py_None) {
                         work->m_error = true;
                         PyObject *resultString = PyObject_Str(result);
@@ -186,7 +190,7 @@ pythonThreadFunc(void* ctx) {
                 //}
             }
             else if (work->m_type == python::Work::T_AllocateInstance) {
-                PyObject *m = PyImport_AddModule("__main__");
+                PyObject *m = PyImport_AddModule("browserplus");
                 PyObject *klass = PyObject_GetAttrString(m, python::BP_GLOBAL_DEF_SYM);
                 // Initialize arguments.
                 PyObject* initArgs = (PyObject*)bpObjectToPython(work->m_obj, 0);

@@ -52,7 +52,12 @@ namespace python {
      * Simplified invocation of a function upon a reciever while catching
      * errors.
      */
-    PyObject* invokeFunction(PyObject* r, const char* funcName, int* error, int nargs, ...);
+    PyObject* invokeFunction(PyObject *r, const char* funcName, int* error, int nargs, ...);
+    /**
+     * Simplified invocation of a function upon a reciever while catching
+     * errors.
+     */
+    PyObject* invokeMethod(PyObject* r, const char* funcName, int* error, int nargs, ...);
     // This little class is taken from http://metaeditor.sourceforge.net/embed/
     // The idea is simple, we need anonymous values returned from
     // python to have a non-zero reference count so that they are not

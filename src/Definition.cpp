@@ -38,7 +38,7 @@
 #include <sstream>
 
 const char* python::BP_GLOBAL_DEF_SYM = "BrowserPlusEntryPointClass";
-#define BP_EXTERNAL_REP_METHOD "to_service_description"
+#define BP_EXTERNAL_REP_METHOD "bp_to_service_description"
 
 bool
 extractString(PyObject* hash, const char* key, std::string& where) {
@@ -230,8 +230,8 @@ while (PyDict_Next(x1, &pos1, &key1, &value1)) {
 }
 //Py_XDECREF(x1);
 ////
-        PyObject *m = PyImport_AddModule("__main__");
-        PyObject *gv = PyObject_GetAttrString(m, BP_GLOBAL_DEF_SYM);
+        PyObject *m = PyImport_AddModule("browserplus");
+		PyObject *gv = PyObject_GetAttrString(m, BP_GLOBAL_DEF_SYM);
         // NEEDSWORK!!!  Is this correct?
         if (gv == NULL || !PyClass_Check(gv)) {
             verboseError.append("python service lacks entry point class, cannot find ");
@@ -241,7 +241,7 @@ while (PyDict_Next(x1, &pos1, &key1, &value1)) {
             return NULL;
         }
         int error = 0;
-        defSym = python::invokeFunction(gv, BP_EXTERNAL_REP_METHOD, &error, 0);
+        defSym = python::invokeFunction(m, BP_EXTERNAL_REP_METHOD, &error, 1, gv);
         if (error) {
             verboseError = formatError("couldn't attain service description");
             Py_XDECREF(defSym);
