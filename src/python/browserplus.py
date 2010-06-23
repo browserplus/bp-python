@@ -67,10 +67,12 @@ def bp_doc(method_string, doc_string = None):
                 ar2 = rgx2.split(arg)
                 aname = ''
                 atype = ''
-                if (len(ar2) > 2):
+                if (len(ar2) > 1):
+                    print "A"
                     aname = ar2[0]
                     atype = ar2[1]
-                elif (len(ar2) > 1):
+                elif (len(ar2) > 0):
+                    print "B"
                     aname = ar2[0]
                 newlist.append({'name': aname, 'type': atype, 'documentation': chomp2(adoc), 'required': (bracket == "<")})
                 service_class.bp_doc[real_method_string] = [doc.strip(), newlist]
@@ -79,13 +81,13 @@ def bp_doc(method_string, doc_string = None):
 
 def bp_to_service_description(service_class):
     l = service_class.bp_doc[None]
-    doc = l[0]
-    init = l[1]
-    hsh = {'class': service_class.name, 'name': service_class.name, 'version': service_class.bp_version, 'documentation': doc, 'functions': []}
+    hsh = {'class': service_class.__name__, 'name': service_class.__name__, 'version': service_class.bp_version, 'documentation': l[0], 'functions': []}
     keys = service_class.bp_doc.keys()
-    keys = keys.sort()
+    keys.sort()
     flist = []
     for i, x in enumerate(keys):
+        if x == None:
+            continue
         bpd = service_class.bp_doc[x]
         flist.append({'name': x, 'documentation': bpd[0], 'arguments': bpd[1]})
     hsh['functions'] = flist
