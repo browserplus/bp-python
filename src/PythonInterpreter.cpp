@@ -69,25 +69,6 @@ AppendPythonPath_BeforeInit(const std::string& s) {
     std::string envValue = PYTHONPATH_CONST + "=" + pyNewPythonPath;
     putenv((char*)envValue.c_str());
 }
-#include <windows.h>
-void
-PrintPythonPath_AfterInit() {
-    PyObject* m = PyImport_ImportModule("sys");
-	if (m != NULL) {
-		PyObject *o = PyObject_GetAttrString(m, "path");
-		if (PyList_Check(o)) {
-			OutputDebugStringA("sys.path start---\n");
-			Py_ssize_t i;
-			for (i = 0; i < PyList_GET_SIZE(o); i++) {
-				PyObject* s = PyList_GET_ITEM(o, i);
-				OutputDebugStringA(PyString_AS_STRING(s));
-				OutputDebugStringA("\n");
-			}
-			OutputDebugStringA("sys.path end---\n");
-        }
-	}
-	Py_XDECREF(m);
-}
 
 void
 AppendPythonPath_AfterInit(const std::string& s) {
@@ -99,7 +80,6 @@ AppendPythonPath_AfterInit(const std::string& s) {
         }
 	}
 	Py_XDECREF(m);
-	PrintPythonPath_AfterInit();
 }
 
 static void*
