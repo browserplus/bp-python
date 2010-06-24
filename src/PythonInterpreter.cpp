@@ -84,6 +84,7 @@ AppendPythonPath_AfterInit(const std::string& s) {
 
 static void*
 pythonThreadFunc(void* ctx) {
+#ifdef WIN32
     std::string ctxPath((const char*)ctx);
     std::string soPath1 = ctxPath + PATHDELIM + "lib";
     std::string soPath2 = soPath1 + PATHDELIM + "lib-tk";
@@ -94,6 +95,24 @@ pythonThreadFunc(void* ctx) {
     AppendPythonPath_BeforeInit(soPath2);
     AppendPythonPath_BeforeInit(soPath3);
     AppendPythonPath_BeforeInit(soPath4);
+#else // WIN32
+    std::string ctxPath((const char*)ctx);
+    std::string soPath1 = ctxPath + PATHDELIM + "lib";
+    std::string soPath2 = soPath1 + PATHDELIM + "lib-old";
+    std::string soPath3 = soPath1 + PATHDELIM + "lib-tk";
+    std::string soPath4 = soPath1 + PATHDELIM + "plat-darwin";
+    std::string soPath5 = soPath1 + PATHDELIM + "plat-mac";
+    std::string soPath6 = soPath1 + PATHDELIM + "plat-mac" + "lib-scriptpackages";
+    std::string soPath7 = soPath1 + PATHDELIM + "site-packages";
+    AppendPythonPath_BeforeInit(ctxPath);
+    AppendPythonPath_BeforeInit(soPath1);
+    AppendPythonPath_BeforeInit(soPath2);
+    AppendPythonPath_BeforeInit(soPath3);
+    AppendPythonPath_BeforeInit(soPath4);
+    AppendPythonPath_BeforeInit(soPath5);
+    AppendPythonPath_BeforeInit(soPath6);
+    AppendPythonPath_BeforeInit(soPath7);
+#endif // WIN32
     s_argv = (char**)calloc(2, sizeof(char*));
     s_argv[0] = "BrowserPlus Embedded Python";
     s_argv[1] = NULL;
@@ -103,11 +122,22 @@ pythonThreadFunc(void* ctx) {
     Py_Initialize();
     PySys_SetArgv(s_argc, s_argv);
     bp_load_builtins();
+#ifdef WIN32
     AppendPythonPath_AfterInit(ctxPath);
     AppendPythonPath_AfterInit(soPath1);
     AppendPythonPath_AfterInit(soPath2);
     AppendPythonPath_AfterInit(soPath3);
     AppendPythonPath_AfterInit(soPath4);
+#else // WIN32
+    AppendPythonPath_AfterInit(ctxPath);
+    AppendPythonPath_AfterInit(soPath1);
+    AppendPythonPath_AfterInit(soPath2);
+    AppendPythonPath_AfterInit(soPath3);
+    AppendPythonPath_AfterInit(soPath4);
+    AppendPythonPath_AfterInit(soPath5);
+    AppendPythonPath_AfterInit(soPath6);
+    AppendPythonPath_AfterInit(soPath7);
+#endif // WIN32
     //PyObject* modname = PyString_FromString("browserplus");
     //PyObject* bpModule = PyImport_Import(modname);
     //Py_XDECREF(modname);
