@@ -73,27 +73,27 @@ AppendPythonPath_BeforeInit(const std::string& s) {
 void
 AppendPythonPath_AfterInit(const std::string& s) {
     PyObject* m = PyImport_ImportModule("sys");
-	if (m != NULL) {
-		PyObject *o = PyObject_GetAttrString(m, "path");
-		if (PyList_Check(o)) {
+    if (m != NULL) {
+        PyObject *o = PyObject_GetAttrString(m, "path");
+        if (PyList_Check(o)) {
             PyList_Append(o, PyString_FromString(s.c_str()));
         }
-	}
-	Py_XDECREF(m);
+    }
+    Py_XDECREF(m);
 }
 
 static void*
 pythonThreadFunc(void* ctx) {
     std::string ctxPath((const char*)ctx);
     std::string soPath1 = ctxPath + PATHDELIM + "lib";
-    std::string soPath2 = soPath1 + PATHDELIM + "plat-win";
-    std::string soPath3 = soPath1 + PATHDELIM + "lib-tk";
+    std::string soPath2 = soPath1 + PATHDELIM + "lib-tk";
+    std::string soPath3 = soPath1 + PATHDELIM + "plat-win";
     std::string soPath4 = soPath1 + PATHDELIM + "site-packages";
-	AppendPythonPath_BeforeInit(ctxPath);
-	AppendPythonPath_BeforeInit(soPath1);
-	AppendPythonPath_BeforeInit(soPath2);
-	AppendPythonPath_BeforeInit(soPath3);
-	AppendPythonPath_BeforeInit(soPath4);
+    AppendPythonPath_BeforeInit(ctxPath);
+    AppendPythonPath_BeforeInit(soPath1);
+    AppendPythonPath_BeforeInit(soPath2);
+    AppendPythonPath_BeforeInit(soPath3);
+    AppendPythonPath_BeforeInit(soPath4);
     s_argv = (char**)calloc(2, sizeof(char*));
     s_argv[0] = "BrowserPlus Embedded Python";
     s_argv[1] = NULL;
@@ -103,11 +103,11 @@ pythonThreadFunc(void* ctx) {
     Py_Initialize();
     PySys_SetArgv(s_argc, s_argv);
     bp_load_builtins();
-	AppendPythonPath_AfterInit(ctxPath);
-	AppendPythonPath_AfterInit(soPath1);
-	AppendPythonPath_AfterInit(soPath2);
-	AppendPythonPath_AfterInit(soPath3);
-	AppendPythonPath_AfterInit(soPath4);
+    AppendPythonPath_AfterInit(ctxPath);
+    AppendPythonPath_AfterInit(soPath1);
+    AppendPythonPath_AfterInit(soPath2);
+    AppendPythonPath_AfterInit(soPath3);
+    AppendPythonPath_AfterInit(soPath4);
     //PyObject* modname = PyString_FromString("browserplus");
     //PyObject* bpModule = PyImport_Import(modname);
     //Py_XDECREF(modname);
@@ -137,14 +137,14 @@ pythonThreadFunc(void* ctx) {
                 // First lets update require path.
                 char* envVal2 = getenv(PYTHONPATH_CONST.c_str());
                 std::string serviceDir = file::dirname(work->sarg);
-				AppendPythonPath_AfterInit(serviceDir);
+                AppendPythonPath_AfterInit(serviceDir);
                 // Read python source file.
                 //std::string source = file::readFile(work->sarg);
                 //if (source.empty()) {
                 //    work->m_error = true;
                 //    work->m_verboseError.append("couldn't read: '" + work->sarg + "'");
                 //} else {
-				std::string source = file::basefilename(work->sarg);
+                std::string source = file::basefilename(work->sarg);
                     //PyObject* dict = PyDict_New();
                     //PyObject* result = PyRun_String(source.c_str(), Py_file_input, dict, dict);
                     PyObject* result = PyImport_ImportModule(source.c_str());
