@@ -7,7 +7,7 @@ import browserplus
 @browserplus.bp_doc("A hello world test service for BrowserPlus.")
 @browserplus.bp_doc("hello:", "return the string, 'hello world'.  original, eh?\n\
                                <who: string> who to say hello to.\n\
-                               [cb: bogus] a callback to invoke (with a bogus type name)")
+                               [cb: callback] a callback to invoke (with a bogus type name)")
 @browserplus.bp_doc("syntax:", "A function which takes no args and has a syntax error")
 class HelloWorld:
     def initialize(args):
@@ -23,5 +23,5 @@ class HelloWorld:
     def syntax(trans, args):
         foo
 
-    def destroy:
+    def destroy():
         print "destroy called!  thanks for calling my destructor, BrowserPlus"

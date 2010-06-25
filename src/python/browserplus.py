@@ -68,11 +68,9 @@ def bp_doc(method_string, doc_string = None):
                 aname = ''
                 atype = ''
                 if (len(ar2) > 1):
-                    print "A"
                     aname = ar2[0]
                     atype = ar2[1]
                 elif (len(ar2) > 0):
-                    print "B"
                     aname = ar2[0]
                 newlist.append({'name': aname, 'type': atype, 'documentation': chomp2(adoc), 'required': (bracket == "<")})
                 service_class.bp_doc[real_method_string] = [doc.strip(), newlist]
