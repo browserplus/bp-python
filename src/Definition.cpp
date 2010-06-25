@@ -165,7 +165,8 @@ processFunction(PyObject* hash, bp::service::Description* desc, std::string& ver
             verboseError.append(" function");
             return false;
         }
-        for (long int i = 0; true; i++) {
+		Py_ssize_t length = PyList_Size(arr);
+        for (long int i = 0; i < length; i++) {
             PyObject* rfHash = PyList_GetItem(arr, i);
             if (rfHash == Py_None) {
                 break;
@@ -278,7 +279,8 @@ python::extractDefinition(std::string& verboseError)
             Py_XDECREF(defSym);
             return NULL;
         }
-        for (long int i = 0; true; i++) {
+		Py_ssize_t length = PyList_Size(arr);
+        for (long int i = 0; i < length; i++) {
             PyObject* rfHash = PyList_GetItem(arr, i);
             if (rfHash == Py_None) {
                 break;
