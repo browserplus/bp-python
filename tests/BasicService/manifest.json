@@ -1,0 +1,16 @@
+{
+  "type": "dependent",
+  "uses": {
+    "corelet": "PythonInterpreter",
+    "version": "1"
+  },
+  "arguments": {
+    "ScriptFile": "hello_world.py"
+  },
+  "strings": {
+    "en": {
+      "title": "Hello World Service",
+      "summary": "the simplest of simple."
+    }
+  }
+}
