@@ -60,7 +60,7 @@ const BPCFunctionTable* g_bpCoreFunctions;
 const BPCoreletDefinition*
 BPPInitialize(const BPCFunctionTable* bpCoreFunctions, const BPElement* parameterMap) {
 #ifdef WIN32
-    //DebugBreak();
+    DebugBreak();
 #endif // WIN32
     // The name of the python script and path can be extracted from the parameter map.
     bp::Object* obj = bp::Object::build(parameterMap);

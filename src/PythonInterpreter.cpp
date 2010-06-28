@@ -138,9 +138,6 @@ pythonThreadFunc(void* ctx) {
     AppendPythonPath_AfterInit(soPath6);
     AppendPythonPath_AfterInit(soPath7);
 #endif // WIN32
-    //PyObject* modname = PyString_FromString("browserplus");
-    //PyObject* bpModule = PyImport_Import(modname);
-    //Py_XDECREF(modname);
     PyObject* bpModule = PyImport_ImportModule("browserplus_internal");
     // Let's release the spawning thread.
     s_pythonLock.lock();
@@ -169,51 +166,39 @@ pythonThreadFunc(void* ctx) {
                 std::string serviceDir = file::dirname(work->sarg);
                 AppendPythonPath_AfterInit(serviceDir);
                 // Read python source file.
-                //std::string source = file::readFile(work->sarg);
-                //if (source.empty()) {
-                //    work->m_error = true;
-                //    work->m_verboseError.append("couldn't read: '" + work->sarg + "'");
-                //} else {
                 std::string source = file::basefilename(work->sarg);
-                    //PyObject* dict = PyDict_New();
-                    //PyObject* result = PyRun_String(source.c_str(), Py_file_input, dict, dict);
-                    PyObject* result = PyImport_ImportModule(source.c_str());
-                    if (result == NULL && result == Py_None) {
+                PyObject* result = PyImport_ImportModule(source.c_str());
+                if (result == NULL && result == Py_None) {
+                    work->m_error = true;
+                    PyObject *resultString = PyObject_Str(result);
+                    Py_XDECREF(resultString);
+                    work->m_verboseError = PyString_AsString(resultString);
+                }
+                else {
+                    // Now it's time to pull out the global symbol
+                    // BrowserPlusEntryPointClass
+                    // and call its to_service_description method
+                    // and we'll get a python data structure we can
+                    // traverse to discover the python interface
+                    work->m_desc = python::extractDefinition(work->m_verboseError);
+                    if (work->m_desc == NULL) {
                         work->m_error = true;
-                        PyObject *resultString = PyObject_Str(result);
-                        Py_XDECREF(resultString);
-                        work->m_verboseError = PyString_AsString(resultString);
                     }
-                    else {
-                        // Now it's time to pull out the global symbol
-                        // BrowserPlusEntryPointClass
-                        // and call its to_service_description method
-                        // and we'll get a python data structure we can
-                        // traverse to discover the python interface
-                        work->m_desc = python::extractDefinition(work->m_verboseError);
-                        if (work->m_desc == NULL) {
-                            work->m_error = true;
-                        }
-                    }
-                    //Py_XDECREF(dict);
-                    Py_XDECREF(result);
-                //}
+                }
+                Py_XDECREF(result);
             }
             else if (work->m_type == python::Work::T_AllocateInstance) {
                 PyObject *m = PyImport_AddModule("browserplus");
                 PyObject *klass = PyObject_GetAttrString(m, python::BP_GLOBAL_DEF_SYM);
-                // Initialize arguments.
-                PyObject* initArgs = (PyObject*)bpObjectToPython(work->m_obj, 0);
-                // NEEDSWORK!!!  Do we need to check if __init__ takes args and pass NULL if not?
-                work->m_instance = PyObject_CallObject(klass, initArgs);
-                if (work->m_instance == NULL) {
-                    work->m_error = true;
-                    work->m_verboseError = python::getLastError();
-                }
-                else {
-                    gcArray.Register(work->m_instance);
-                }
-                Py_XDECREF(initArgs);
+				// NEEDSWORK!!!  Do we need to check if __init__ takes args and pass NULL if not?
+				work->m_instance = PyObject_CallObject(klass, NULL);
+				if (work->m_instance == NULL) {
+					work->m_error = true;
+					work->m_verboseError = python::getLastError();
+				}
+				else {
+					gcArray.Register(work->m_instance);
+				}
                 Py_XDECREF(klass);
             }
             else if (work->m_type == python::Work::T_InvokeMethod) {
