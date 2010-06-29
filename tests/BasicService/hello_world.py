@@ -5,10 +5,10 @@ import browserplus
 
 @browserplus.bp_version("1.0.0")
 @browserplus.bp_doc("A hello world test service for BrowserPlus.")
-@browserplus.bp_doc("hello:", "return the string, 'hello world'.  original, eh?\n\
-                               <who: string> who to say hello to.\n\
-                               [cb: callback] a callback to invoke (with a bogus type name)")
-@browserplus.bp_doc("syntax:", "A function which takes no args and has a syntax error")
+@browserplus.bp_doc("hello", "return the string, 'hello world'.  original, eh?\n\
+                              <who: string> who to say hello to.\n\
+                              [cb: callback] a callback to invoke")
+@browserplus.bp_doc("syntax", "A function which takes no args and has a syntax error")
 class HelloWorld:
     def initialize(args):
         #require 'pp'

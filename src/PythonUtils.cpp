@@ -81,6 +81,7 @@ python::invokeFunction(PyObject *r, const char* funcName, int* error, int nargs,
     va_list argh;
     va_start(argh, nargs);
 	PyObject* pyArgs[MAX_ARGS];
+	memset(pyArgs, 0, sizeof(PyObject*) * MAX_ARGS);
 	for (int i = 0; i < nargs; i++) {
 		pyArgs[i] = va_arg(argh, PyObject*);
 	}
@@ -194,7 +195,7 @@ python::invokeFunction(PyObject *r, const char* funcName, int* error, int nargs,
     va_end(argh);
 	if (result == NULL)
 	{
-		std::string s = python::getLastError();
+		*error = 1;
 	}
     Py_XDECREF(f);
     return result;
@@ -210,6 +211,7 @@ python::invokeMethod(PyObject* r, const char* funcName, int* error, int nargs, .
     va_list argh;
     va_start(argh, nargs);
 	PyObject* pyArgs[MAX_ARGS];
+	memset(pyArgs, 0, sizeof(PyObject*) * MAX_ARGS);
 	for (int i = 0; i < nargs; i++) {
 		pyArgs[i] = va_arg(argh, PyObject*);
 	}
@@ -323,7 +325,7 @@ python::invokeMethod(PyObject* r, const char* funcName, int* error, int nargs, .
     va_end(argh);
 	if (result == NULL)
 	{
-		std::string s = python::getLastError();
+		*error = 1;
 	}
     Py_XDECREF(funcNameString);
     return result;

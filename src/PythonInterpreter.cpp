@@ -162,7 +162,6 @@ pythonThreadFunc(void* ctx) {
         if (work != NULL) {
             if (work->m_type == python::Work::T_LoadService) {
                 // First lets update require path.
-                char* envVal2 = getenv(PYTHONPATH_CONST.c_str());
                 std::string serviceDir = file::dirname(work->sarg);
                 AppendPythonPath_AfterInit(serviceDir);
                 // Read python source file.
@@ -209,7 +208,7 @@ pythonThreadFunc(void* ctx) {
                 Py_XDECREF(kwds);
                 Py_XDECREF(args);
                 g_bpCoreFunctions->log(BP_DEBUG, "executing func '%s'", work->sarg.c_str());
-                python::invokeFunction(work->m_instance, work->sarg.c_str(), &error, 2, trans, bpObjectToPython(work->m_obj, work->m_tid));
+                python::invokeMethod(work->m_instance, work->sarg.c_str(), &error, 2, trans, bpObjectToPython(work->m_obj, work->m_tid));
                 if (error) {
                     g_bpCoreFunctions->postError(work->m_tid, "python.evalError", python::getLastError().c_str());
                 }
