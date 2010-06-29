@@ -2,6 +2,7 @@
 # A rough sketch of how a service under python engine 1.x.x may look.
 # 
 import browserplus
+import pprint
 
 @browserplus.bp_version("1.0.0")
 @browserplus.bp_doc("A hello world test service for BrowserPlus.")
@@ -11,9 +12,9 @@ import browserplus
 @browserplus.bp_doc("syntax", "A function which takes no args and has a syntax error")
 class HelloWorld:
     def initialize(args):
-        #require 'pp'
         print "init called!  w00t"
-        #pp args
+        pp = pprint.PrettyPrinter(index=4)
+        pp.pprint(args)
 
     def hello(trans, args):
         if cb in args:
