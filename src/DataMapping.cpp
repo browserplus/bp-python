@@ -116,7 +116,7 @@ bpObjectToPython(const bp::Object* obj, unsigned int tid) {
             }
             break;
         case BPTInteger:
-            v = PyInt_FromLong(((bp::Integer*)obj)->value());
+            v = PyLong_FromLongLong(((bp::Integer*)obj)->value());
             break;
         case BPTDouble:
             v = PyFloat_FromDouble(((bp::Double*)obj)->value());
@@ -155,7 +155,10 @@ bpObjectToPython(const bp::Object* obj, unsigned int tid) {
         case BPTCallBack: {
             PyObject* args = Py_BuildValue("ll", tid, ((bp::Integer*)obj)->value());
             PyObject* kwds = Py_BuildValue("");
+            // NEEDSWORK!!! Is there a way to allocate and initialize a PyTypeObject instance in one call??
             v = PyType_GenericNew((PyTypeObject*)bp_py_cCallback, args, kwds);
+            int error = 0;
+            python::invokeMethod(v, "__init__", &error, 2, PyLong_FromLong(tid), PyLong_FromLongLong(((bp::Integer*)obj)->value()));
             Py_XDECREF(kwds);
             Py_XDECREF(args);
             break;

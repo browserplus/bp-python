@@ -11,5 +11,5 @@ import browserplus
 class BadType:
     def hello(self, trans, args):
         if 'cb' in args:
-            args['cb'].invoke("Hi there {args['who']}")
-        trans.complete("hello {args['who']}")
+            args['cb'].invoke(str.format("Hi there {0[who]}", args))
+        trans.complete(str.format("hello {0[who]}", args))
