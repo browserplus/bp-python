@@ -9,7 +9,7 @@ import browserplus
                               <who: string> who to say hello to.\n\
                               [cb: bogus] a callback to invoke (with a bogus type name)")
 class BadType:
-    def hello(trans, args):
-        if cb in args:
-            args[cb].invoke("Hi there #{args[:who]}")
-        trans.complete("hello #{args[:who]}")
+    def hello(self, trans, args):
+        if 'cb' in args:
+            args['cb'].invoke("Hi there {args['who']}")
+        trans.complete("hello {args['who']}")

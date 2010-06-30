@@ -11,18 +11,18 @@ import pprint
                               [cb: callback] a callback to invoke")
 @browserplus.bp_doc("syntax", "A function which takes no args and has a syntax error")
 class HelloWorld:
-    def initialize(args):
+    def initialize(self, args):
         print "init called!  w00t"
         pp = pprint.PrettyPrinter(index=4)
         pp.pprint(args)
 
-    def hello(trans, args):
-        if cb in args:
-            args[cb].invoke("Hi there #{args[:who]}")
-        trans.complete("hello #{args[:who]}")
+    def hello(self, trans, args):
+        if 'cb' in args:
+            args['cb'].invoke("Hi there {args['who']}")
+        trans.complete("hello {args['who']}")
 
-    def syntax(trans, args):
+    def syntax(self, trans, args):
         foo
 
-    def destroy():
+    def destroy(self):
         print "destroy called!  thanks for calling my destructor, BrowserPlus"

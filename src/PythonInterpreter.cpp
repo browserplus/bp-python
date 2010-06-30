@@ -204,7 +204,7 @@ pythonThreadFunc(void* ctx) {
                 int error = 0;
                 PyObject* args = Py_BuildValue("l", work->m_tid);
                 PyObject* kwds = Py_BuildValue("");
-                PyObject* trans = PyType_GenericNew((PyTypeObject*)bp_py_cCallback, args, kwds);
+                PyObject* trans = PyType_GenericNew((PyTypeObject*)bp_py_cTransaction, args, kwds);
                 Py_XDECREF(kwds);
                 Py_XDECREF(args);
                 g_bpCoreFunctions->log(BP_DEBUG, "executing func '%s'", work->sarg.c_str());
