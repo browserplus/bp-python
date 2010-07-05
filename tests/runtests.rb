@@ -1,20 +1,22 @@
 #!/usr/bin/env ruby
 
-require File.join(File.dirname(__FILE__), 'bp_service_runner')
+require File.join(File.dirname(File.dirname(File.expand_path(__FILE__))),
+                  'external/dist/share/service_testing/bp_service_runner.rb')
 require 'uri'
 require 'test/unit'
 require 'open-uri'
 
 class TestFileAccess < Test::Unit::TestCase
   def setup
-    @interpService = "../build/RubyInterpreter"
+    @cwd = File.dirname(File.expand_path(__FILE__))
+    @interpService = File.join(@cwd, "../build/PythonInterpreter")
   end
   
   def teardown
   end
 
   def test_file_checksum
-    BrowserPlus.run("FileChecksum", @interpService) { |s|
+    BrowserPlus.run(File.join(@cwd, "FileChecksum"), @interpService) { |s|
       curDir = File.dirname(__FILE__)
       textfile_path = File.expand_path(File.join(curDir, "services.txt"))
       # XXX: service runner needs to grow up here.
@@ -24,7 +26,7 @@ class TestFileAccess < Test::Unit::TestCase
   end
 
   def test_basic_service
-    BrowserPlus.run("BasicService", @interpService) { |s|
+    BrowserPlus.run(File.join(@cwd, "BasicService"), @interpService) { |s|
       require 'pp'
       r = s.hello({:who => 'lloyd'}) { |o|
         assert_equal o['callback'], 1
@@ -39,29 +41,30 @@ class TestFileAccess < Test::Unit::TestCase
 
   # basic test of built in extensions
   def test_sha1
-    BrowserPlus.run("SHA1", @interpService) { |s|
+    BrowserPlus.run(File.join(@cwd, "SHA1"), @interpService) { |s|
       require 'digest/sha1'
       assert_equal s.sha1, Digest::SHA1.hexdigest("hello world")
     }
   end
 
+  # XXX: openssl currently disabled!
   # slightly deeper test of built in extensions, generate
   # some keypairs!
-  def test_crypto
-    BrowserPlus.run("Crypto", @interpService) { |s|
-      assert_equal 342, s.generate.length
-      assert_equal 342, s.generate.length
-      assert_equal 342, s.generate.length
-      assert_equal 342, s.generate.length
-      assert_equal 342, s.generate.length
-      assert_equal s.listKeys.length, 5
-    }
-  end
+#  def test_crypto
+#    BrowserPlus.run("Crypto", @interpService) { |s|
+#      assert_equal 342, s.generate.length
+#      assert_equal 342, s.generate.length
+#      assert_equal 342, s.generate.length
+#      assert_equal 342, s.generate.length
+#      assert_equal 342, s.generate.length
+#      assert_equal s.listKeys.length, 5
+#    }
+#  end
 
   # A junk ruby file
   def test_syntax_error
     assert_raise(RuntimeError) do 
-      BrowserPlus.run("SyntaxError", @interpService) { |s| }
+      BrowserPlus.run(File.join(@cwd, "SyntaxError"), @interpService) { |s| }
     end
   end
 
@@ -69,14 +72,14 @@ class TestFileAccess < Test::Unit::TestCase
   # test that there's verbose and useful information in the log output)
   def test_bad_type
     assert_raise(RuntimeError) do 
-      BrowserPlus.run("BadType", @interpService) { |s| }
+      BrowserPlus.run(File.join(@cwd, "BadType"), @interpService) { |s| }
     end
   end
 
   # A bad type defined within the ruby file - (NOTE: really wish we could
   # test that there's verbose and useful information in the log output)
   def test_require_stmt
-    BrowserPlus.run("RequireTest", @interpService) { |s|
+    BrowserPlus.run(File.join(@cwd, "RequireTest"), @interpService) { |s|
       assert_equal s.yo, "a string"
     }
   end

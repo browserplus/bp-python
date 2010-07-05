@@ -1,0 +1,16 @@
+{
+  "type": "dependent",
+  "uses": {
+    "corelet": "PythonInterpreter",
+    "version": "1"
+  },
+  "arguments": {
+    "ScriptFile": "crypto.py"
+  },
+  "strings": {
+    "en": {
+      "title": "Cryptographic Plugin",
+      "summary": "A test of python built-in libraries."
+    }
+  }
+}
