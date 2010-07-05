@@ -1,16 +1,16 @@
 {
   "type": "dependent",
   "uses": {
-    "corelet": "RubyInterpreter",
-    "version": "5"
+    "corelet": "PythonInterpreter",
+    "version": "1"
   },
   "arguments": {
-    "ScriptFile": "double_definition.rb"
+    "ScriptFile": "double_definition.py"
   },
   "strings": {
     "en": {
-      "title": "A ruby service which defines _two_ entry point classes, should break loudly",
-      "summary": "testing ruby's handling of semantic errors in services."
+      "title": "A python service which defines _two_ entry point classes, should break loudly",
+      "summary": "testing python's handling of semantic errors in services."
     }
   }
 }

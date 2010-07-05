@@ -1,36 +1,26 @@
-# a rough sketch of how a service under ruby engine 5.x.x may look,
 # 
-# we'll need some of why's goodness to get here:
-# http://github.com/why/fakeplus/blob/master/stdlib/bp_hacks.rb
-#
-# design credit? why, the lucky stiff, of course.
-#
+# a rough sketch of how a service under python engine 1.x.x may look,
+# 
+import browserplus
 
-class HelloWorld
-  bp_version "1.0.0"
-  bp_doc "A hello world test service for BrowserPlus."
+@browserplus.bp_version("1.0.0")
+@browserplus.bp_doc("A hello world test service for BrowserPlus.")
+@browserplus.bp_doc("hello", "return the string, 'hello world'.  original, eh?\n\
+                              <who: string> who to say hello to.\n\
+                              [cb: callback] a callback to invoke")
+class HelloWorld:
+    def hello(self, trans, args):
+        if 'cb' in args:
+            args['cb'].invoke(str.format("Hi there {0[who]}", args))
+        trans.complete(str.format("hello {0[who]}", args))
 
-  def hello(trans, args)
-    args[:cb].invoke("Hi there #{args[:who]}") if args.has_key? :cb
-    trans.complete("hello #{args[:who]}")
-  end
-
-  bp_doc :hello, "return the string, 'hello world'.  original, eh?
-                  <who: string> who to say hello to.
-                  [cb: callback] a callback to invoke"
-end
-
-class Foo
-  bp_version "1.0.0"
-  bp_doc "A hello world test service for BrowserPlus."
-
-  def hello(trans, args)
-    args[:cb].invoke("Hi there #{args[:who]}") if args.has_key? :cb
-    trans.complete("hello #{args[:who]}")
-  end
-
-  bp_doc :hello, "return the string, 'hello world'.  original, eh?
-                  <who: string> who to say hello to.
-                  [cb: callback] a callback to invoke"
-end
-
+@browserplus.bp_version("1.0.0")
+@browserplus.bp_doc("A hello world test service for BrowserPlus.")
+@browserplus.bp_doc("hello", "return the string, 'hello world'.  original, eh?\n\
+                              <who: string> who to say hello to.\n\
+                              [cb: callback] a callback to invoke")
+class Foo:
+    def hello(self, trans, args):
+        if 'cb' in args:
+            args['cb'].invoke(str.format("Hi there {0[who]}", args))
+        trans.complete(str.format("hello {0[who]}", args))
