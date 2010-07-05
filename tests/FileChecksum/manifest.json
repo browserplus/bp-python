@@ -1,11 +1,11 @@
 {
   "type": "dependent",
   "uses": {
-    "corelet": "RubyInterpreter",
-    "version": "5"
+    "corelet": "PythonInterpreter",
+    "version": "1"
   },
   "arguments": {
-    "ScriptFile": "checksum.rb"
+    "ScriptFile": "checksum.py"
   },
   "strings": {
     "en": {

@@ -1,11 +1,11 @@
 {
   "type": "dependent",
   "uses": {
-    "corelet": "RubyInterpreter",
-    "version": "5"
+    "corelet": "PythonInterpreter",
+    "version": "1"
   },
   "arguments": {
-    "ScriptFile": "hello_world.rb"
+    "ScriptFile": "hello_world.py"
   },
   "strings": {
     "en": {
