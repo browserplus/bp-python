@@ -12,9 +12,8 @@ import browserplus
                             <file: path> The file for which to calculate a checksum.")
 class FileChecksum:
     def md5(self, bp, args):
-        #begin
-        #    contents = File.open(args[:file].realpath, "rb") { |f| f.read }
-        #    bp.complete(Digest::MD5.hexdigest(contents))
-        #rescue Exception => err
-        #    bp.error("Error", err.to_s)
-        #end
+        try:
+            #contents = File.open(args[:file].realpath, "rb") { |f| f.read }
+            #bp.complete(Digest::MD5.hexdigest(contents))
+        except Exception as err:
+            #bp.error("Error", err.to_s)
