@@ -5,25 +5,15 @@ require 'fileutils'
 require 'pathname'
 include Config
 
-# configure thyself
-if CONFIG['arch'] =~ /mswin/
-    $platform = "Windows"
-elsif CONFIG['arch'] =~ /darwin/
-    $platform = "Darwin"
-elsif CONFIG['arch'] =~ /linux/
-    $platform = "Linux"
-else
-  raise "unsupported platform: #{CONFIG['arch']}"
-end
-
 TOPDIR = File.dirname(File.expand_path(__FILE__))
 
 require File.join(TOPDIR, "bakery/ports/bakery")
 
 $order = {
-  :output_dir => File.join(TOPDIR, $platform),
+  :output_dir => File.join(TOPDIR, "dist"),
   :packages => [
-                "python26"
+                "python26",
+                "service_testing"
                ],
   :verbose => true
 }
