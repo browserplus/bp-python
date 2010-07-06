@@ -22,7 +22,7 @@ class HelloWorld:
         trans.complete(str.format("hello {0[who]}", args))
 
     def syntax(self, trans, args):
-        foo
+        foo()
 
     def destroy(self):
         print "destroy called!  thanks for calling my destructor, BrowserPlus"
