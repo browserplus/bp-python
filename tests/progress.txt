@@ -2,7 +2,7 @@
 *BasicService
 Crypto (**need crypto lib)
 *DoubleDefinition
-FileChecksum (**need digest lib)
+#FileChecksum
 NativeBundledExtension
 *RequireTest
 *SHA1
