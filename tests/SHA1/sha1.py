@@ -1,4 +1,6 @@
+#
 # Toy crypto service for testing built-in python libraries
+#
 
 import browserplus
 import hashlib

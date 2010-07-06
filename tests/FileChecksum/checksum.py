@@ -1,10 +1,10 @@
 #
-# A simple BrowserPlus service implemented in Ruby that will calculate the
+# A simple BrowserPlus service implemented in Python that will calculate the
 # MD5 sum of a file that a user has selected
 #
 
 import browserplus
-#require 'digest/md5'
+import hashlib
 
 @browserplus.bp_version("1.0.0")
 @browserplus.bp_doc("Allows client side MD5 of user selected files.")
@@ -13,7 +13,15 @@ import browserplus
 class FileChecksum:
     def md5(self, bp, args):
         try:
-            #contents = File.open(args[:file].realpath, "rb") { |f| f.read }
-            #bp.complete(Digest::MD5.hexdigest(contents))
+            contents = ""
+            if 'file' in args:
+                f = open(args['file'].realpath, "rb")
+                try:
+                    contents = f.read()
+                finally:
+                    f.close()
+            m = hashlib.md5()
+            m.update(contents)
+            bp.complete(m.digest())
         except Exception as err:
-            #bp.error("Error", err.to_s)
+            bp.error("Error", err.__str__())
