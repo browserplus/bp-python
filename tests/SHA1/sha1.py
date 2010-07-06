@@ -1,4 +1,4 @@
-# Toy crypto service for testing built-in ruby extensions
+# Toy crypto service for testing built-in python libraries
 
 import browserplus
 #require 'digest/sha1'

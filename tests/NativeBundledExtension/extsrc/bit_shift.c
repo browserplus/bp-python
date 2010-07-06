@@ -1,9 +1,9 @@
 /**
  * A "hello world" native extension for the purposes of testing bundled
- * native extensions inside ruby services
+ * native extensions inside python services
  */
 
-#include "ruby.h"
+#include "python.h"
 
 static VALUE t_left(VALUE self, VALUE obj)
 {

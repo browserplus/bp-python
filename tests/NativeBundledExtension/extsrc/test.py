@@ -1,6 +1,6 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env python
 
-require 'BitShifter'
+import BitShifter
 
 x = BitShifter.new
 puts "47 << 1 = #{x.left(47)}"

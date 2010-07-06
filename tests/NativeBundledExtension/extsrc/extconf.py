@@ -1,4 +1,2 @@
-require 'mkmf'
+import mkmf
 create_makefile("BitShifter")
-
- 
