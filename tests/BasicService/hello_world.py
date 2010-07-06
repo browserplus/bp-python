@@ -6,12 +6,12 @@ import browserplus
 import pprint
 
 @browserplus.bp_version("1.0.0")
-@browserplus.bp_doc("A hello world test service for BrowserPlus.")
+@browserplus.bp_doc("A hello world test python service for BrowserPlus.")
 @browserplus.bp_doc("hello", "return the string, 'hello world'.  original, eh?\n\
                               <who: string> who to say hello to.\n\
                               [cb: callback] a callback to invoke")
 @browserplus.bp_doc("syntax", "A function which takes no args and has a syntax error")
-class HelloWorld:
+class HelloPython:
     def initialize(self, args):
         print "init called!  w00t"
         pp = pprint.PrettyPrinter(index=4)
