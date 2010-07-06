@@ -2,13 +2,6 @@
 #
 
 import browserplus
-import ssl
-#import os
-#from base64 import b64encode
-#from M2Crypto import RSA
-#import md5
-#import RSA
-import hashlib
 
 @browserplus.bp_version("1.0.0")
 @browserplus.bp_doc("A tool for generating RSA keypairs on the client.")

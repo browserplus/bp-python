@@ -1,6 +1,7 @@
 #
 # A simple service with a bogus type in its description
 #
+
 import browserplus
 
 @browserplus.bp_version("1.0.0")
