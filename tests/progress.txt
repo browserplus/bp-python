@@ -5,5 +5,5 @@ Crypto (**need crypto lib)
 FileChecksum (**need digest lib)
 NativeBundledExtension
 *RequireTest
-SHA1
+*SHA1
 *SyntaxError
