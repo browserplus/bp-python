@@ -1,0 +1,9 @@
+*BadType
+*BasicService
+Crypto (**need crypto lib)
+*DoubleDefinition
+FileChecksum (**need digest lib)
+NativeBundledExtension
+*RequireTest
+SHA1
+*SyntaxError
