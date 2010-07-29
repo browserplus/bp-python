@@ -236,3 +236,12 @@ ENDIF (WIN32)
 ADD_CUSTOM_COMMAND(TARGET ${serviceName} POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
                            \"${loc}\" \"${outputDir}\")
+
+# Pre-build step, build our externals
+#
+ADD_CUSTOM_TARGET(
+    ${serviceName}Externals ALL
+    COMMAND ruby build.rb
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../external"
+    COMMENT Building externals...)
+ADD_DEPENDENCIES(${serviceName} ${serviceName}Externals)
