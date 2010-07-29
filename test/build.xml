@@ -1,4 +1,4 @@
-<project name="BrowserPlusPython_tests" default="build_release">
+<project name="BrowserPlusPython_test" default="build_release">
     <condition property="is.windows">
         <os family="windows" />
     </condition>
