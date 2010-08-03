@@ -6,7 +6,7 @@ require 'uri'
 require 'test/unit'
 require 'open-uri'
 
-class TestFileAccess < Test::Unit::TestCase
+class TestPython < Test::Unit::TestCase
   def setup
     # arguments are a string that must match the test name
     subdir = 'build/PythonInterpreter'
