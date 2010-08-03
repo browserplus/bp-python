@@ -217,8 +217,11 @@ IF (APPLE)
       TARGET ${serviceName} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy \"${outputDir}/${libpythonBefore}\" \"${outputDir}/${libpythonAfter}\"  
       COMMAND ${CMAKE_COMMAND} -E remove \"${outputDir}/${libpythonBefore}\"
-      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup.sh ${loc}
-      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup.sh ${loc}
+      COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup.sh | tr -d '\r' > ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup_unix.sh
+      COMMAND chmod 777 ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup_unix.sh
+      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup_unix.sh ${loc}
+      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup_unix.sh ${loc}
+      COMMAND ${CMAKE_COMMAND} -E remove \"${CMAKE_CURRENT_SOURCE_DIR}/libpython_fixup_unix.sh\"
       )
 ENDIF ()
 
