@@ -37,11 +37,10 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.1)
 
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-framework/build_support/BuildConfigs.cmake)
-
 SET (serviceName PythonInterpreter)
-
 PROJECT(${serviceName}Service)
+
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-framework/build_support/BuildConfigs.cmake)
 
 IF (WIN32)
   SET (outputDir "${CMAKE_CURRENT_BINARY_DIR}/${serviceName}$(OutDir)")
