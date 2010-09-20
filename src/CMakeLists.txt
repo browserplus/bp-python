@@ -79,11 +79,12 @@ ENDIF ()
 
 SET(extDir "${CMAKE_CURRENT_SOURCE_DIR}/../external")
 SET(extBinDir "${extDir}/dist/bin")
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "CodeCoverage")
-  SET(extLibDir "${extDir}/dist/lib/Debug")
-ELSE ()
-  SET(extLibDir "${extDir}/dist/lib/${CMAKE_BUILD_TYPE}")
-ENDIF ()
+#IF ("${CMAKE_BUILD_TYPE}" STREQUAL "CodeCoverage")
+#  SET(extLibDir "${extDir}/dist/lib/Debug")
+#ELSE ()
+#  SET(extLibDir "${extDir}/dist/lib/${CMAKE_BUILD_TYPE}")
+#ENDIF ()
+SET(extLibDir "${extDir}/dist/lib")
 SET(extIncDir "${extDir}/dist/include/python26")
 SET(CPPTOOLS_DIR "${extDir}/bp-service-tools/CppTools/src")
 
@@ -116,7 +117,7 @@ SET(EXT_SRCS
 
 # find the path to the python library we'll link
 MESSAGE("looking in ${pythonLibPath}")
-FIND_LIBRARY(pythonDylib NAMES python msvcr90-ruby191
+FIND_LIBRARY(pythonDylib NAMES python2.6
              PATHS ${pythonLibPath}
              NO_DEFAULT_PATH
              NO_SYSTEM_ENVIRONMENT_PATH)
@@ -179,14 +180,14 @@ ELSE ()
 ENDIF ()
 
 # handle the .lib .dll dichotomy
-#IF (WIN32)
-#  SET (pythonLibToShip_debug ${pythonDylib_debug})
-#  SET (pythonLibToShip_release ${pythonDylib_release})
-#  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShip_debug ${pythonDylib_debug})
-#  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShip_release ${pythonDylib_release})
-#ELSE()
-#  SET (pythonLibToShip ${pythonDylib})
-#ENDIF ()
+IF (WIN32)
+  SET (pythonLibToShip_debug ${pythonDylib_debug})
+  SET (pythonLibToShip_release ${pythonDylib_release})
+  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShip_debug ${pythonDylib_debug})
+  STRING(REGEX REPLACE "lib$" "dll" pythonLibToShip_release ${pythonDylib_release})
+ELSE()
+  SET (pythonLibToShip ${pythonDylib})
+ENDIF ()
 
 #IF(WIN32)
 #  MESSAGE("python library to link (debug):   ${pythonDylib_debug}" )
