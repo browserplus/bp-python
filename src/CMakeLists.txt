@@ -84,12 +84,13 @@ IF ("${CMAKE_BUILD_TYPE}" STREQUAL "CodeCoverage")
 ELSE ()
   SET(extLibDir "${extDir}/dist/lib/${CMAKE_BUILD_TYPE}")
 ENDIF ()
-SET(extLibDir "${extDir}/dist/lib")
 SET(extIncDir "${extDir}/dist/include/python26")
 SET(CPPTOOLS_DIR "${extDir}/bp-service-tools/CppTools/src")
 IF (WIN32)
   SET(extLibDir_debug "${extDir}/dist/lib/Debug")
   SET(extLibDir_release "${extDir}/dist/lib/Release")
+ELSE ()
+  SET(extLibDir "${extDir}/dist/lib")
 ENDIF ()
 
 INCLUDE_DIRECTORIES(
@@ -171,7 +172,12 @@ ENDIF (WIN32)
 
 BPAddCppService()
 
-SET(stdlibSource "${extLibDir}")
+IF (WIN32)
+  SET(stdlibSource_debug "${extLibDir_debug}")
+  SET(stdlibSource_release "${extLibDir_release}")
+ELSE (WIN32)
+  SET(stdlibSource "${extLibDir}")
+ENDIF (WIN32)
 SET(stdlibDest "${OUTPUT_DIR}")
 
 IF (UNIX)
@@ -267,19 +273,4 @@ IF (APPLE)
     COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${loc}\" \"${OUTPUT_DIR}\"
   )
 ENDIF ()
-
-## copy in manifest
-#GET_FILENAME_COMPONENT(ServiceLibrary "${loc}" NAME)
-#IF (WIN32)
-#  CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/manifest.json"
-#                 "${OUTPUT_DIR_debug}/manifest.json") 
-#  CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/manifest.json"
-#                 "${OUTPUT_DIR_release}/manifest.json") 
-#ELSE (WIN32)
-#  CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/manifest.json"
-#                 "${OUTPUT_DIR}/manifest.json") 
-#ENDIF (WIN32)
-#ADD_CUSTOM_COMMAND(TARGET ${SERVICE_NAME} POST_BUILD
-#                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#                           \"${loc}\" \"${OUTPUT_DIR}\")
 
