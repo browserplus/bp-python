@@ -173,12 +173,12 @@ ENDIF (WIN32)
 BPAddCppService()
 
 IF (WIN32)
-  SET(stdlibSource_debug "${extLibDir_debug}")
-  SET(stdlibSource_release "${extLibDir_release}")
+  SET(stdlibSource_debug "${extLibDir_debug}/python2.6")
+  SET(stdlibSource_release "${extLibDir_release}/python2.6")
 ELSE (WIN32)
-  SET(stdlibSource "${extLibDir}")
+  SET(stdlibSource "${extLibDir}/python2.6")
 ENDIF (WIN32)
-SET(stdlibDest "${OUTPUT_DIR}")
+SET(stdlibDest "${OUTPUT_DIR}/python2.6")
 
 IF (UNIX)
   SET(RM_CMD rm -rf)
@@ -210,6 +210,7 @@ ELSE(WIN32)
   MESSAGE("library to ship:        ${pythonLibToShip}")
 ENDIF(WIN32)
 
+MESSAGE("${stdlibDest} will get deleted")
 IF (WIN32)
   ADD_CUSTOM_COMMAND(
     TARGET ${SERVICE_NAME} POST_BUILD
@@ -222,7 +223,7 @@ IF (WIN32)
             \"${stdlibDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             \"${CMAKE_CURRENT_SOURCE_DIR}/python/browserplus.py\"
-            \"${stdlibDest}\"
+            \"${OUTPUT_DIR}\"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             \"${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt\"
             \"${OUTPUT_DIR}\"
@@ -245,7 +246,7 @@ ELSE (WIN32)
             \"${stdlibDest}\"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             \"${CMAKE_CURRENT_SOURCE_DIR}/python/browserplus.py\"
-            \"${stdlibDest}\"
+            \"${OUTPUT_DIR}\"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             \"${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt\"
             \"${OUTPUT_DIR}\"
