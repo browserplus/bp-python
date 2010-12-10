@@ -86,7 +86,7 @@ static void*
 pythonThreadFunc(void* ctx) {
 #ifdef WIN32
     std::string ctxPath((const char*)ctx);
-    std::string soPath1 = ctxPath + PATHDELIM + "lib";
+    std::string soPath1 = ctxPath + PATHDELIM + "python2.6";
     std::string soPath2 = soPath1 + PATHDELIM + "lib-tk";
     std::string soPath3 = soPath1 + PATHDELIM + "plat-win";
     std::string soPath4 = soPath1 + PATHDELIM + "site-packages";
@@ -97,7 +97,7 @@ pythonThreadFunc(void* ctx) {
     AppendPythonPath_BeforeInit(soPath4);
 #else // WIN32
     std::string ctxPath((const char*)ctx);
-    std::string soPath1 = ctxPath + PATHDELIM + "lib";
+    std::string soPath1 = ctxPath + PATHDELIM + "python2.6";
     std::string soPath2 = soPath1 + PATHDELIM + "lib-old";
     std::string soPath3 = soPath1 + PATHDELIM + "lib-tk";
     std::string soPath4 = soPath1 + PATHDELIM + "plat-darwin";
